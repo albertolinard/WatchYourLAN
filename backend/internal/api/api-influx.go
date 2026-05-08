@@ -60,9 +60,10 @@ func getInfluxUptime(c *gin.Context) {
   |> range(start: -%dh)
   |> filter(fn: (r) => r._measurement == "WatchYourLAN")
   |> filter(fn: (r) => r._field == "state")
-  |> aggregateWindow(every: %s, fn: last, createEmpty: true)
+  |> aggregateWindow(every: %s, fn: last, createEmpty: false)
+  |> filter(fn: (r) => r._value == 1)
   |> group(columns: ["_time"])
-  |> sum()`, cfg.InfluxBucket, rangeHours, aggWindow)
+  |> count()`, cfg.InfluxBucket, rangeHours, aggWindow)
 
 	points, err := queryInfluxDB(cfg, fluxQuery)
 	if err != nil {
