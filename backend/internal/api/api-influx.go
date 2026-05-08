@@ -56,14 +56,7 @@ func getInfluxUptime(c *gin.Context) {
 		aggWindow = "30m"
 	}
 
-	fluxQuery := fmt.Sprintf(`from(bucket: "%s")
-  |> range(start: -%dh)
-  |> filter(fn: (r) => r._measurement == "WatchYourLAN")
-  |> filter(fn: (r) => r._field == "state")
-  |> aggregateWindow(every: %s, fn: last, createEmpty: false)
-  |> filter(fn: (r) => r._value == 1)
-  |> group(columns: ["_time"])
-  |> count()`, cfg.InfluxBucket, rangeHours, aggWindow)
+	fluxQuery := buildUptimeFluxQuery(cfg.InfluxBucket, rangeHours, aggWindow)
 
 	points, err := queryInfluxDB(cfg, fluxQuery)
 	if err != nil {
@@ -72,6 +65,20 @@ func getInfluxUptime(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, points)
+}
+
+func buildUptimeFluxQuery(bucket string, rangeHours int, aggWindow string) string {
+	return fmt.Sprintf(`from(bucket: "%s")
+  |> range(start: -%dh)
+  |> filter(fn: (r) => r._measurement == "WatchYourLAN")
+  |> filter(fn: (r) => r._field == "state")
+  |> group(columns: ["mac"])
+  |> aggregateWindow(every: %s, fn: last, createEmpty: true)
+  |> fill(usePrevious: true)
+  |> filter(fn: (r) => r._value == 1)
+  |> group(columns: ["_time"])
+  |> count(column: "_value")
+  |> sort(columns: ["_time"])`, bucket, rangeHours, aggWindow)
 }
 
 // queryInfluxDB executes a Flux query against InfluxDB and parses the CSV response
