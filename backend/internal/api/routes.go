@@ -31,6 +31,8 @@ func Routes(router *gin.Engine) {
 		r0.GET("/port/:addr/:port", getPortState) // api-network.go
 		r0.GET("/wol/:mac", sendWOL)              // api-network.go
 
+		r0.GET("/influx/uptime", getInfluxUptime) // api-influx.go
+
 		r0.POST("/config/", saveConfigHandler)                // config.go
 		r0.POST("/config_settings/", saveSettingsHandler)     // config.go
 		r0.POST("/config_influx/", saveInfluxHandler)         // config.go

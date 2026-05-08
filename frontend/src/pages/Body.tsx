@@ -9,6 +9,7 @@ import CardHead from "../components/Body/CardHead";
 import StatsCards from "../components/StatsCards";
 import SearchFilterBar from "../components/SearchFilterBar";
 import TopologyMap from "../components/TopologyMap";
+import DashboardCharts from "../components/DashboardCharts";
 import { getHosts } from "../functions/atstart";
 
 function Body() {
@@ -20,6 +21,7 @@ function Body() {
   return (
     <>
     <StatsCards />
+    <DashboardCharts />
     <SearchFilterBar />
     <Show when={viewMode() === "topology"}>
       <TopologyMap />

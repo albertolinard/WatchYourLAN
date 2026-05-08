@@ -260,3 +260,13 @@
     border-color: rgba(255,255,255,0.1);
     background-color: rgba(255,255,255,0.04);
 }
+
+/* ===== Chart styles ===== */
+.chart-container {
+    position: relative;
+    width: 100%;
+}
+
+.chart-container canvas {
+    width: 100% !important;
+}
