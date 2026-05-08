@@ -82,3 +82,10 @@ export const apiWOL = async (mac:string) => {
 
   return res;
 };
+
+export const apiGetStatus = async () => {
+  const url = apiPath+'/api/status/';
+  const res = await (await fetch(url)).json();
+
+  return res;
+};

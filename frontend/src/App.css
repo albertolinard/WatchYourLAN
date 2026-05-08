@@ -31,3 +31,56 @@
 .my-box-on:hover, .my-box-off:hover {
     background-color: #0000001a;
 }
+
+/* Stats cards hover */
+.card.border-primary:hover,
+.card.border-success:hover,
+.card.border-secondary:hover,
+.card.border-info:hover,
+.card.border-warning:hover {
+    transform: translateY(-2px);
+    transition: transform 0.15s ease;
+}
+
+/* Device card hover */
+.card.h-100:hover {
+    box-shadow: 0 0.25rem 0.5rem rgba(0,0,0,0.15);
+    transition: box-shadow 0.15s ease;
+}
+
+/* Pill filter badges */
+.badge.bg-primary i {
+    opacity: 0.8;
+}
+.badge.bg-primary i:hover {
+    opacity: 1;
+}
+
+/* Online pulse animation */
+@keyframes pulse-online {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+.badge.bg-success {
+    animation: pulse-online 2s ease-in-out infinite;
+}
+
+/* Sticky filter bar shadow */
+.sticky-top {
+    border-bottom: 1px solid var(--bs-border-color);
+    margin-bottom: 0 !important;
+}
+
+/* View toggle active state */
+.btn-group .btn-primary {
+    pointer-events: none;
+}
+
+/* Responsive card grid */
+@media (max-width: 576px) {
+    .col-xl-3, .col-lg-4, .col-md-6 {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+}

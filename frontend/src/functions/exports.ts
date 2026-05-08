@@ -93,3 +93,25 @@ export const [show, setShow] = createSignal<number>(200);
 export const [histUpdOnFilter, setHistUpdOnFilter] = createSignal(false);
 
 export const [selectedIDs, setSelectedIDs] = createSignal<number[]>([]);
+
+export interface Stat {
+  Total:   number;
+  Online:  number;
+  Offline: number;
+  Known:   number;
+  Unknown: number;
+};
+
+export const emptyStat:Stat = {
+  Total:   0,
+  Online:  0,
+  Offline: 0,
+  Known:   0,
+  Unknown: 0,
+};
+
+export const [appStat, setAppStat] = createSignal<Stat>(emptyStat);
+
+export const [viewMode, setViewMode] = createSignal<string>("table");
+
+export const [activeFilters, setActiveFilters] = createSignal<{field: string, label: string}[]>([]);

@@ -1,5 +1,15 @@
 FROM --platform=$BUILDPLATFORM tonistiigi/xx AS xx
 
+# Frontend build
+FROM --platform=$BUILDPLATFORM node:alpine AS frontend
+
+WORKDIR /src
+COPY frontend/package.json frontend/package-lock.json ./
+RUN npm ci
+COPY frontend/ .
+RUN npm run build
+
+# Go backend build
 FROM --platform=$BUILDPLATFORM golang:alpine AS builder
 
 COPY --from=xx / /
@@ -10,6 +20,9 @@ COPY backend/go.mod backend/go.sum ./
 RUN go mod download
 
 COPY backend/ .
+
+# Copy frontend build output into Go's embedded public dir
+COPY --from=frontend /src/dist/assets/ internal/web/public/assets/
 
 ARG TARGETPLATFORM
 RUN CGO_ENABLED=0 xx-go build -ldflags='-w -s' -o /WatchYourLAN ./cmd/WatchYourLAN

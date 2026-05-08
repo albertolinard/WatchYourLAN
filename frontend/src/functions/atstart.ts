@@ -1,14 +1,16 @@
-import { apiGetAllHosts } from "./api";
-import { allHosts, setAllHosts, setBkpHosts, setIfaces } from "./exports";
+import { apiGetAllHosts, apiGetStatus } from "./api";
+import { allHosts, setAllHosts, setBkpHosts, setIfaces, setAppStat } from "./exports";
 import { filterAtStart, filterFunc } from "./filter";
 import { sortAtStart } from "./sort";
 
 export function runAtStart() {
   getHosts();
+  getStats();
   filterFunc("ID", 0); // reset filter
 
   setInterval(() => {
     getHosts();
+    getStats();
   }, 60000); // 60000 ms = 1 minute
 }
 
@@ -22,6 +24,13 @@ export async function getHosts() {
     listIfaces();
     sortAtStart();
     filterAtStart();
+  }
+}
+
+export async function getStats() {
+  const stat = await apiGetStatus();
+  if (stat !== null) {
+    setAppStat(stat);
   }
 }
 

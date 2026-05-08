@@ -1,6 +1,7 @@
 import { createSignal, Show } from "solid-js";
 import { editNames, selectedIDs, setSelectedIDs } from "../../functions/exports";
 import { apiEditHost } from "../../functions/api";
+import { vendorIcon } from "../../functions/vendor";
 
 import { debounce } from "@solid-primitives/scheduled"; 
 
@@ -15,6 +16,8 @@ function TableRow(_props: any) {
 
   let known:boolean;
   _props.host.Known === 1 ? known = true : known = false;
+
+  const icon = vendorIcon(_props.host.Hw, _props.host.Mac);
 
   const debouncedApi = debounce(async (val: string) => {
     await apiEditHost(_props.host.ID, val, "");
@@ -45,7 +48,7 @@ function TableRow(_props: any) {
       <td>
         <Show
           when={editNames()}
-          fallback={name()}
+          fallback={<><i class={`bi ${icon} text-primary me-1`}></i>{name()}</>}
         >
           <input type="text" class="form-control" value={name()}
             onInput={e => handleInput(e.target.value)}></input>
