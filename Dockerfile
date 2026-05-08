@@ -21,8 +21,10 @@ RUN go mod download
 
 COPY backend/ .
 
-# Copy frontend build output into Go's embedded public dir
-COPY --from=frontend /src/dist/assets/ internal/web/public/assets/
+# Replace embedded frontend assets with the freshly built bundle.
+# Templates load `/fs/public/assets/*`, so copy asset contents into `public/assets/`.
+RUN rm -rf internal/web/public/assets/*
+COPY --from=frontend /src/dist/assets/. internal/web/public/assets/
 
 ARG TARGETPLATFORM
 RUN CGO_ENABLED=0 xx-go build -ldflags='-w -s' -o /WatchYourLAN ./cmd/WatchYourLAN
