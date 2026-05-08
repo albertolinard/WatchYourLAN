@@ -13,22 +13,45 @@ import (
 	"github.com/aceberg/WatchYourLAN/internal/prometheus"
 )
 
-// lastInfluxState tracks the last `Now` (online/offline) value written to
-// InfluxDB per MAC. Writes are skipped when the state has not changed,
-// preventing tag-cardinality bloat and excessive points for idle hosts.
-// Single-writer access (scan loop) — no mutex needed.
-var lastInfluxState = make(map[string]int)
+// influxWriteState tracks per-MAC: last Now value + scan cycle count since last write.
+// A point is written on state transition (online<->offline) or every 10 cycles as heartbeat.
+var influxWriteState = struct {
+	lastNow map[string]int
+	cycles  map[string]int
+}{
+	lastNow: make(map[string]int),
+	cycles:  make(map[string]int),
+}
+
+const influxHeartbeatCycles = 10
 
 func writeInflux(h models.Host) {
 	if !conf.AppConfig.InfluxEnable {
 		return
 	}
-	prev, seen := lastInfluxState[h.Mac]
-	if seen && prev == h.Now {
+	prev, seen := influxWriteState.lastNow[h.Mac]
+	cycles := influxWriteState.cycles[h.Mac]
+
+	// Write on state transition or heartbeat
+	if seen && prev == h.Now && cycles < influxHeartbeatCycles {
+		influxWriteState.cycles[h.Mac] = cycles + 1
 		return
 	}
+
+	// Fill empty tags that InfluxDB line protocol rejects
+	if h.Iface == "" {
+		h.Iface = "unknown"
+	}
+	if h.IP == "" {
+		h.IP = "0.0.0.0"
+	}
+	if h.Mac == "" {
+		h.Mac = "00:00:00:00:00:00"
+	}
+
 	influx.Add(conf.AppConfig, h)
-	lastInfluxState[h.Mac] = h.Now
+	influxWriteState.lastNow[h.Mac] = h.Now
+	influxWriteState.cycles[h.Mac] = 0
 }
 
 func startScan(quit chan bool) {
