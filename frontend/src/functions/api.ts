@@ -53,6 +53,22 @@ export const apiDelHost = async (id:number) => {
   return res;
 };
 
+export const apiAddHost = async (mac:string, name:string, ip:string, hw:string) => {
+
+  const params = new URLSearchParams();
+  if (name) params.set('name', name);
+  if (ip)   params.set('ip', ip);
+  if (hw)   params.set('hw', hw);
+  const qs = params.toString();
+
+  const url = apiPath + '/api/host/add/' + encodeURIComponent(mac) + (qs ? '?' + qs : '');
+  const res = await fetch(url, { method: 'POST' });
+  if (!res.ok) {
+    throw new Error('Add host failed: HTTP ' + res.status);
+  }
+  return res.json();
+};
+
 export const apiPortScan = async (ip:string, port:number) => {
 
   const url = apiPath+'/api/port/'+ip+'/'+port;

@@ -2,9 +2,11 @@ import { createSignal, For, Show } from "solid-js";
 import { Host, ifaces, activeFilters, setActiveFilters, viewMode, setViewMode } from "../functions/exports";
 import { filterFunc } from "../functions/filter";
 import { searchFunc } from "../functions/search";
+import AddHostModal from "./AddHostModal";
 
 function SearchFilterBar() {
   const [searchText, setSearchText] = createSignal("");
+  const [showAdd, setShowAdd] = createSignal(false);
 
   const addFilter = (field: keyof Host, value: any, label: string) => {
     filterFunc(field, value);
@@ -83,8 +85,17 @@ function SearchFilterBar() {
           </button>
         </Show>
 
+        {/* Add Host */}
+        <button
+          class="btn btn-success ms-auto"
+          title="Add host manually"
+          onClick={() => setShowAdd(true)}
+        >
+          <i class="bi bi-plus-lg"></i> Add Host
+        </button>
+
         {/* View toggle */}
-        <div class="btn-group ms-auto">
+        <div class="btn-group">
           <button class={`btn btn-sm ${viewMode() === "table" ? "btn-primary" : "btn-outline-primary"}`} onClick={() => setViewMode("table")} title="Table view">
             <i class="bi bi-list"></i>
           </button>
@@ -96,6 +107,7 @@ function SearchFilterBar() {
           </button>
         </div>
       </div>
+      <AddHostModal open={showAdd} onClose={() => setShowAdd(false)} />
     </div>
   )
 }
