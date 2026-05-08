@@ -21,16 +21,16 @@ function HostPage() {
 
   return (
     <>
-    <div class="row">
-      <div class="col-md">
+    <div class="row g-3">
+      <div class="col-lg-8">
         <HostCard host={currentHost()}></HostCard>
       </div>
-      <div class="col-md">
+      <div class="col-lg-4">
         <Ping IP={currentHost().IP}></Ping>
       </div>
     </div>
-    <div class="row mt-4">
-      <div class="col-md">
+    <div class="row mt-3">
+      <div class="col-12">
         <HistCard mac={currentHost().Mac}></HistCard>
       </div>
     </div>

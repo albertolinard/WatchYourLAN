@@ -8,6 +8,7 @@ import TableHead from "../components/Body/TableHead";
 import CardHead from "../components/Body/CardHead";
 import StatsCards from "../components/StatsCards";
 import SearchFilterBar from "../components/SearchFilterBar";
+import TopologyMap from "../components/TopologyMap";
 import { getHosts } from "../functions/atstart";
 
 function Body() {
@@ -20,32 +21,37 @@ function Body() {
     <>
     <StatsCards />
     <SearchFilterBar />
-    <div class="card border-primary">
-      <div class="card-header">
-        <CardHead></CardHead>
-      </div>
-      <div class="card-body table-responsive">
-        <Show when={viewMode() === "table"}>
-          <table class="table table-striped table-hover">
-            <TableHead></TableHead>
-            <tbody>
-              <For each={allHosts}>{(host, index) =>
-              <TableRow host={host} index={index() + 1}></TableRow>
+    <Show when={viewMode() === "topology"}>
+      <TopologyMap />
+    </Show>
+    <Show when={viewMode() !== "topology"}>
+      <div class="card border-primary">
+        <div class="card-header">
+          <CardHead></CardHead>
+        </div>
+        <div class="card-body table-responsive">
+          <Show when={viewMode() === "table"}>
+            <table class="table table-striped table-hover">
+              <TableHead></TableHead>
+              <tbody>
+                <For each={allHosts}>{(host, index) =>
+                <TableRow host={host} index={index() + 1}></TableRow>
+                }</For>
+              </tbody>
+            </table>
+          </Show>
+          <Show when={viewMode() === "cards"}>
+            <div class="row g-3">
+              <For each={allHosts}>{(host) =>
+              <div class="col-xl-3 col-lg-4 col-md-6">
+                <DeviceCard host={host}></DeviceCard>
+              </div>
               }</For>
-            </tbody>
-          </table>
-        </Show>
-        <Show when={viewMode() === "cards"}>
-          <div class="row g-3">
-            <For each={allHosts}>{(host) =>
-            <div class="col-xl-3 col-lg-4 col-md-6">
-              <DeviceCard host={host}></DeviceCard>
             </div>
-            }</For>
-          </div>
-        </Show>
+          </Show>
+        </div>
       </div>
-    </div>
+    </Show>
     </>
   )
 }

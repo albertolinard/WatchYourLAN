@@ -12,10 +12,9 @@ function MacHistory(_props: any) {
     const newHistory = await getHistoryForMac(_props.mac, _props.date);
     setHist(newHistory);
     interval = setInterval(async () => {
-      // console.log("Upd Hist", new Date());
       const newHistory = await getHistoryForMac(_props.mac, _props.date);
       setHist(newHistory);
-    }, 60000); // 60000 ms = 1 minute
+    }, 60000);
   });
 
   onCleanup(() => {
@@ -23,14 +22,16 @@ function MacHistory(_props: any) {
   });
 
   return (
-    <For each={hist}>{(h, index) =>
-      <Show
-        when={index() < show()}
-      >
-        <i title={"Date:"+h.Date+"\nIface:"+h.Iface+"\nIP:"+h.IP+"\nKnown:"+h.Known} 
-        class={h.Now === 0?"my-box-off":"my-box-on"}></i>
-      </Show>
-    }</For>
+    <div class="uptime-strip">
+      <For each={hist}>{(h, index) =>
+        <Show when={index() < show()}>
+          <span
+            class={`uptime-block ${h.Now === 0 ? "uptime-off" : "uptime-on"}`}
+            title={`Date: ${h.Date}\nIface: ${h.Iface}\nIP: ${h.IP}\nKnown: ${h.Known ? "Yes" : "No"}`}
+          ></span>
+        </Show>
+      }</For>
+    </div>
   )
 }
 

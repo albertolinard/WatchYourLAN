@@ -17,21 +17,6 @@
     background-color: var(--transparent-light);
 }
 
-/* History box */
-.my-box-on::before, .my-box-off::before {
-    content: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='18'></svg>");
-    border-left: thin solid black;
-}
-.my-box-on {
-    background-color: var(--bs-success);
-}
-.my-box-off {
-    background-color: var(--bs-gray-500);
-}
-.my-box-on:hover, .my-box-off:hover {
-    background-color: #0000001a;
-}
-
 /* Stats cards hover */
 .card.border-primary:hover,
 .card.border-success:hover,
@@ -58,12 +43,12 @@
 
 /* Online pulse animation */
 @keyframes pulse-online {
-    0% { opacity: 1; }
-    50% { opacity: 0.5; }
-    100% { opacity: 1; }
+    0% { box-shadow: 0 0 0 0 rgba(25, 135, 84, 0.6); }
+    70% { box-shadow: 0 0 0 6px rgba(25, 135, 84, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(25, 135, 84, 0); }
 }
-.badge.bg-success {
-    animation: pulse-online 2s ease-in-out infinite;
+.online-pulse {
+    animation: pulse-online 2s ease-out infinite;
 }
 
 /* Sticky filter bar shadow */
@@ -83,4 +68,195 @@
         flex: 0 0 100%;
         max-width: 100%;
     }
+}
+
+/* ===== Uptime strip ===== */
+.uptime-strip-container {
+    overflow-x: auto;
+    padding: 0.5rem 0;
+}
+
+.uptime-strip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
+    align-items: center;
+}
+
+.uptime-block {
+    display: inline-block;
+    width: 14px;
+    height: 22px;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: transform 0.1s ease, opacity 0.1s ease;
+    flex-shrink: 0;
+}
+
+.uptime-block:hover {
+    transform: scaleY(1.4);
+    opacity: 0.85;
+    z-index: 1;
+    position: relative;
+}
+
+.uptime-on {
+    background-color: var(--bs-success);
+}
+
+.uptime-off {
+    background-color: var(--bs-gray-500);
+}
+
+/* ===== Host page layout ===== */
+.card-header.d-flex {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+/* Profile card inner cards */
+.card.bg-body-secondary {
+    border: none;
+}
+
+/* ===== Notification badge ===== */
+.notification-badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    min-width: 18px;
+    height: 18px;
+    font-size: 0.65rem;
+    line-height: 18px;
+    text-align: center;
+    border-radius: 50%;
+    background-color: var(--bs-danger);
+    color: #fff;
+    font-weight: 700;
+    padding: 0 4px;
+}
+
+.nav-link-wrapper {
+    position: relative;
+    display: inline-flex;
+}
+
+/* ===== Dark mode refinements ===== */
+[data-bs-theme="dark"] .card {
+    border-color: rgba(255,255,255,0.08);
+}
+
+[data-bs-theme="dark"] .card.bg-body-secondary {
+    background-color: rgba(255,255,255,0.04) !important;
+}
+
+[data-bs-theme="dark"] .card-header {
+    border-bottom-color: rgba(255,255,255,0.08);
+}
+
+[data-bs-theme="dark"] .card.border-primary {
+    border-color: rgba(13, 110, 253, 0.5) !important;
+    box-shadow: 0 0 0 1px rgba(13, 110, 253, 0.15);
+}
+
+[data-bs-theme="dark"] .form-control,
+[data-bs-theme="dark"] .form-select {
+    background-color: rgba(255,255,255,0.06);
+    border-color: rgba(255,255,255,0.12);
+}
+
+[data-bs-theme="dark"] .badge.bg-secondary {
+    background-color: rgba(255,255,255,0.12) !important;
+    color: rgba(255,255,255,0.6) !important;
+}
+
+[data-bs-theme="dark"] .text-muted {
+    color: rgba(255,255,255,0.5) !important;
+}
+
+/* Glassmorphism on cards in dark mode */
+[data-bs-theme="dark"] .card.border-primary {
+    background: linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+/* ===== Transition polish ===== */
+.card {
+    transition: box-shadow 0.2s ease, transform 0.15s ease;
+}
+
+.btn {
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+/* Online/offline badge transitions */
+.badge {
+    transition: background-color 0.3s ease;
+}
+
+/* ===== Network topology ===== */
+.topology-nodes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding-left: 1rem;
+    border-left: 2px solid var(--bs-primary);
+    margin-left: 0.5rem;
+}
+
+.topology-node {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 0.75rem;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    min-width: 64px;
+    border: 1px solid var(--bs-border-color);
+}
+
+.topology-node:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.12);
+    color: var(--bs-primary);
+}
+
+.topology-node i {
+    font-size: 1.4rem;
+}
+
+.topology-node-online {
+    background-color: rgba(25, 135, 84, 0.08);
+    border-color: rgba(25, 135, 84, 0.3);
+}
+
+.topology-node-offline {
+    opacity: 0.55;
+}
+
+.topology-node-known {
+    border-width: 1.5px;
+}
+
+.topology-node-name {
+    color: var(--bs-body-color);
+    text-align: center;
+    max-width: 72px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+[data-bs-theme="dark"] .topology-node-online {
+    background-color: rgba(25, 135, 84, 0.15);
+    border-color: rgba(25, 135, 84, 0.4);
+}
+
+[data-bs-theme="dark"] .topology-node {
+    border-color: rgba(255,255,255,0.1);
+    background-color: rgba(255,255,255,0.04);
 }

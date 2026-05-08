@@ -91,6 +91,9 @@ function SearchFilterBar() {
           <button class={`btn btn-sm ${viewMode() === "cards" ? "btn-primary" : "btn-outline-primary"}`} onClick={() => setViewMode("cards")} title="Card view">
             <i class="bi bi-grid-3x3-gap"></i>
           </button>
+          <button class={`btn btn-sm ${viewMode() === "topology" ? "btn-primary" : "btn-outline-primary"}`} onClick={() => setViewMode("topology")} title="Topology view">
+            <i class="bi bi-diagram-3"></i>
+          </button>
         </div>
       </div>
     </div>

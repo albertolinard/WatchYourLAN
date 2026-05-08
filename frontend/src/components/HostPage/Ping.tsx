@@ -12,7 +12,7 @@ function Ping(_props: any) {
 
   const handleScan = async () => {
     stop = false;
-    
+
     let begin = Number(beginStr());
     if (Number.isNaN(begin) || begin < 1 || begin > 65535) {
       begin = 1;
@@ -46,28 +46,33 @@ function Ping(_props: any) {
   }
 
   return (
-    <div class="card border-primary">
-      <div class="card-header">Port Scan</div>
+    <div class="card border-primary h-100">
+      <div class="card-header d-flex align-items-center">
+        <i class="bi bi-radar me-2"></i>
+        <h6 class="mb-0">Port Scan</h6>
+      </div>
       <div class="card-body">
-        <form class="input-group">
+        <div class="input-group input-group-sm mb-2">
           <input type="text" class="form-control" placeholder="1"
             onInput={e => setBegin(e.target.value)}></input>
           <input type="text" class="form-control" placeholder="65535"
             onInput={e => setEnd(e.target.value)}></input>
-          <button type="button" onClick={handleScan} class="btn btn-primary">Scan</button>
-        </form>
+          <button type="button" onClick={handleScan} class="btn btn-sm btn-primary">
+            <i class="bi bi-play-fill me-1"></i>Scan
+          </button>
+        </div>
         {curPort() != ""
-        ? <div class="d-flex justify-content-between mt-2">
-            <button type="button" onClick={handleStop} class="btn btn-warning">Stop/Continue</button>
-            <div>Scanning port: {curPort()}</div>
+        ? <div class="d-flex justify-content-between align-items-center mb-2">
+            <button type="button" onClick={handleStop} class="btn btn-sm btn-warning">
+              <i class="bi bi-pause-fill me-1"></i>{stop ? "Continue" : "Stop"}
+            </button>
+            <small class="text-muted">Scanning: {curPort()}</small>
           </div>
         : <></>
         }
-        <div class="mt-2">
         <For each={foundPorts()}>{(port) =>
-          <a class="me-4" href={"http://" + _props.IP + ":" + port} target="_blank">{port}</a>
+          <a class="badge bg-success me-1 mb-1 text-decoration-none" href={"http://" + _props.IP + ":" + port} target="_blank">{port}</a>
         }</For>
-        </div>
       </div>
     </div>
   )

@@ -1,4 +1,4 @@
-export const apiPath = 'http://0.0.0.0:8840';
+export const apiPath = typeof window !== 'undefined' ? `${window.location.protocol}//${window.location.host}` : 'http://0.0.0.0:8840';
 
 export const apiGetAllHosts = async () => {
   const url = apiPath+'/api/all';
