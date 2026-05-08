@@ -32,7 +32,7 @@ export const apiTestNotify = async () => {
 export const apiEditHost = async (id:number, name:string, known:string) => {
 
   const url = apiPath+'/api/edit/'+id+'/'+name+'/'+known;
-  const res = await (await fetch(url)).json();
+  const res = await (await fetch(url, { method: 'PUT' })).json();
 
   return res;
 };
@@ -48,7 +48,7 @@ export const apiGetHost = async (id:string) => {
 export const apiDelHost = async (id:number) => {
 
   const url = apiPath+'/api/host/del/'+id;
-  const res = await (await fetch(url)).json();
+  const res = await (await fetch(url, { method: 'DELETE' })).json();
 
   return res;
 };

@@ -13,6 +13,24 @@ import (
 	"github.com/aceberg/WatchYourLAN/internal/prometheus"
 )
 
+// lastInfluxState tracks the last `Now` (online/offline) value written to
+// InfluxDB per MAC. Writes are skipped when the state has not changed,
+// preventing tag-cardinality bloat and excessive points for idle hosts.
+// Single-writer access (scan loop) — no mutex needed.
+var lastInfluxState = make(map[string]int)
+
+func writeInflux(h models.Host) {
+	if !conf.AppConfig.InfluxEnable {
+		return
+	}
+	prev, seen := lastInfluxState[h.Mac]
+	if seen && prev == h.Now {
+		return
+	}
+	influx.Add(conf.AppConfig, h)
+	lastInfluxState[h.Mac] = h.Now
+}
+
 func startScan(quit chan bool) {
 	var lastDate, nowDate, plusDate time.Time
 	var foundHosts []models.Host
@@ -73,9 +91,7 @@ func compareHosts(foundHostsMap map[string]models.Host) {
 		aHost.Date = time.Now().Format("2006-01-02 15:04:05")
 		gdb.Update("history", aHost)
 
-		if conf.AppConfig.InfluxEnable {
-			influx.Add(conf.AppConfig, aHost)
-		}
+		writeInflux(aHost)
 		if conf.AppConfig.PrometheusEnable {
 			prometheus.Add(aHost)
 		}
@@ -87,5 +103,6 @@ func compareHosts(foundHostsMap map[string]models.Host) {
 		notify.Unknown(fHost) // Log and Shoutrrr
 
 		gdb.Update("now", fHost)
+		writeInflux(fHost)
 	}
 }

@@ -1,7 +1,7 @@
 package portscan
 
 import (
-	"fmt"
+	"log/slog"
 	"net"
 	"time"
 )
@@ -10,16 +10,14 @@ import (
 func IsOpen(host, port string) bool {
 
 	timeout := 3 * time.Second
-	target := fmt.Sprintf("%s:%s", host, port)
+	target := net.JoinHostPort(host, port)
 
 	conn, err := net.DialTimeout("tcp", target, timeout)
-
-	if err == nil {
-		err = conn.Close()
-		if err == nil {
-			return true
-		}
+	if err != nil {
+		return false
 	}
-
-	return false
+	if cerr := conn.Close(); cerr != nil {
+		slog.Debug("port close error", "target", target, "err", cerr)
+	}
+	return true
 }

@@ -6,46 +6,85 @@ import (
 	"fmt"
 	"log/slog"
 	"strings"
+	"sync"
 
 	"github.com/influxdata/influxdb-client-go/v2"
+	"github.com/influxdata/influxdb-client-go/v2/api"
 
 	"github.com/aceberg/WatchYourLAN/internal/check"
 	"github.com/aceberg/WatchYourLAN/internal/models"
 )
 
-// Add - write data to InfluxDB2
-func Add(appConfig models.Conf, oneHist models.Host) {
-	var ctx context.Context
+var (
+	clientMu     sync.Mutex
+	client       influxdb2.Client
+	writeAPI     api.WriteAPIBlocking
+	currentAddr  string
+	currentToken string
+	currentOrg   string
+	currentBkt   string
+	currentSkip  bool
+)
 
-	client := influxdb2.NewClientWithOptions(appConfig.InfluxAddr, appConfig.InfluxToken,
+func getWriter(appConfig models.Conf) api.WriteAPIBlocking {
+	clientMu.Lock()
+	defer clientMu.Unlock()
+
+	if client != nil &&
+		currentAddr == appConfig.InfluxAddr &&
+		currentToken == appConfig.InfluxToken &&
+		currentOrg == appConfig.InfluxOrg &&
+		currentBkt == appConfig.InfluxBucket &&
+		currentSkip == appConfig.InfluxSkipTLS {
+		return writeAPI
+	}
+
+	if client != nil {
+		client.Close()
+	}
+
+	client = influxdb2.NewClientWithOptions(appConfig.InfluxAddr, appConfig.InfluxToken,
 		influxdb2.DefaultOptions().
 			SetUseGZip(true).
 			SetTLSConfig(&tls.Config{
 				InsecureSkipVerify: appConfig.InfluxSkipTLS,
 			}))
+	writeAPI = client.WriteAPIBlocking(appConfig.InfluxOrg, appConfig.InfluxBucket)
 
-	ctx = context.Background()
-	ping, err := client.Ping(ctx)
-	if ping {
-		writeAPI := client.WriteAPIBlocking(appConfig.InfluxOrg, appConfig.InfluxBucket)
+	currentAddr = appConfig.InfluxAddr
+	currentToken = appConfig.InfluxToken
+	currentOrg = appConfig.InfluxOrg
+	currentBkt = appConfig.InfluxBucket
+	currentSkip = appConfig.InfluxSkipTLS
 
-		// Escape special characters in strings
-		oneHist.Name = strings.ReplaceAll(oneHist.Name, " ", "\\ ")
-		oneHist.Name = strings.ReplaceAll(oneHist.Name, ",", "\\,")
-		oneHist.Name = strings.ReplaceAll(oneHist.Name, "=", "\\=")
-		if oneHist.Name == "" {
-			oneHist.Name = "unknown"
-		}
+	return writeAPI
+}
 
-		line := fmt.Sprintf("WatchYourLAN,IP=%s,iface=%s,name=%s,mac=%s,known=%d state=%d", oneHist.IP, oneHist.Iface, oneHist.Name, oneHist.Mac, oneHist.Known, oneHist.Now)
-		// slog.Debug("Writing to InfluxDB", "line", line)
+func escapeTag(s string) string {
+	s = strings.ReplaceAll(s, "\\", "\\\\")
+	s = strings.ReplaceAll(s, " ", "\\ ")
+	s = strings.ReplaceAll(s, ",", "\\,")
+	s = strings.ReplaceAll(s, "=", "\\=")
+	s = strings.ReplaceAll(s, "\n", "")
+	s = strings.ReplaceAll(s, "\r", "")
+	return s
+}
 
-		err = writeAPI.WriteRecord(context.Background(), line)
-		check.IfError(err)
-	} else {
-		slog.Error("Can't connect to InfluxDB server")
-		check.IfError(err)
+// Add - write data to InfluxDB2
+func Add(appConfig models.Conf, oneHist models.Host) {
+	w := getWriter(appConfig)
+
+	name := escapeTag(oneHist.Name)
+	if name == "" {
+		name = "unknown"
 	}
 
-	client.Close()
+	line := fmt.Sprintf("WatchYourLAN,IP=%s,iface=%s,name=%s,mac=%s,known=%d state=%d",
+		escapeTag(oneHist.IP), escapeTag(oneHist.Iface), name, escapeTag(oneHist.Mac),
+		oneHist.Known, oneHist.Now)
+
+	err := w.WriteRecord(context.Background(), line)
+	if check.IfError(err) {
+		slog.Error("InfluxDB write failed", "err", err)
+	}
 }

@@ -4,6 +4,7 @@ import (
 	"log/slog"
 	"os/exec"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/aceberg/WatchYourLAN/internal/check"
@@ -87,33 +88,49 @@ func parseOutput(text, iface string) []models.Host {
 	return foundHosts
 }
 
-// Scan all interfaces
+// Scan all interfaces in parallel
 func Scan(ifaces, args string, strs []string) []models.Host {
-	var text string
-	var foundHosts = []models.Host{}
 	arpArgs = args
 
+	var jobs []func() []models.Host
+
 	if ifaces != "" {
-
-		ifacesList := strings.Split(ifaces, " ")
-
-		for _, iface := range ifacesList {
-			slog.Debug("Scanning interface " + iface)
-			text = scanIface(iface)
-			slog.Debug("Found IPs: \n" + text)
-
-			foundHosts = append(foundHosts, parseOutput(text, iface)...)
+		for _, iface := range strings.Split(ifaces, " ") {
+			i := iface
+			jobs = append(jobs, func() []models.Host {
+				slog.Debug("Scanning interface " + i)
+				text := scanIface(i)
+				slog.Debug("Found IPs on " + i + ":\n" + text)
+				return parseOutput(text, i)
+			})
 		}
 	}
 
 	for _, s := range strs {
-		slog.Debug("Scanning string " + s)
-		text = scanStr(s)
-		slog.Debug("Found IPs: \n" + text)
-
-		iface := extractIface(s)
-		foundHosts = append(foundHosts, parseOutput(text, iface)...)
+		str := s
+		jobs = append(jobs, func() []models.Host {
+			slog.Debug("Scanning string " + str)
+			text := scanStr(str)
+			slog.Debug("Found IPs:\n" + text)
+			return parseOutput(text, extractIface(str))
+		})
 	}
 
+	resCh := make(chan []models.Host, len(jobs))
+	var wg sync.WaitGroup
+	for _, job := range jobs {
+		wg.Add(1)
+		go func(j func() []models.Host) {
+			defer wg.Done()
+			resCh <- j()
+		}(job)
+	}
+	wg.Wait()
+	close(resCh)
+
+	var foundHosts []models.Host
+	for hosts := range resCh {
+		foundHosts = append(foundHosts, hosts...)
+	}
 	return foundHosts
 }

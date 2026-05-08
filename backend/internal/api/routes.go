@@ -13,10 +13,16 @@ func Routes(router *gin.Engine) {
 	r0 := router.Group("/api")
 	{
 		r0.GET("/all", getAllHosts)                // api-hosts.go
-		r0.GET("/edit/:id/:name/*known", editHost) // api-hosts.go
+		r0.PUT("/edit/:id/:name/*known", editHost) // api-hosts.go
 		r0.GET("/host/:id", getHost)               // api-hosts.go
-		r0.GET("/host/del/:id", delHost)           // api-hosts.go
-		r0.GET("/host/add/:mac", addHost)          // api-hosts.go
+		r0.DELETE("/host/del/:id", delHost)        // api-hosts.go
+		r0.POST("/host/add/:mac", addHost)         // api-hosts.go
+
+		// Backwards-compat aliases for old GET callers (curl scripts, bookmarks).
+		// Remove once all consumers migrate.
+		r0.GET("/edit/:id/:name/*known", editHost)
+		r0.GET("/host/del/:id", delHost)
+		r0.GET("/host/add/:mac", addHost)
 
 		r0.GET("/config", getConfig)        // api-system.go
 		r0.GET("/notify_test", notifyTest)  // api-system.go
