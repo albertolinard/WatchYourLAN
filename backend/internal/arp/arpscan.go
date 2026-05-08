@@ -64,20 +64,24 @@ func scanStr(str string) string {
 func parseOutput(text, iface string) []models.Host {
 	var foundHosts = []models.Host{}
 
-	p := strings.Split(text, "\n")
+	lines := strings.Split(text, "\n")
 
-	for _, host := range p {
-		if host != "" {
-			var oneHost models.Host
-			p := strings.Split(host, "	")
-			oneHost.Iface = iface
-			oneHost.IP = p[0]
-			oneHost.Mac = p[1]
-			oneHost.Hw = p[2]
-			oneHost.Date = time.Now().Format("2006-01-02 15:04:05")
-			oneHost.Now = 1
-			foundHosts = append(foundHosts, oneHost)
+	for _, host := range lines {
+		if host == "" {
+			continue
 		}
+		fields := strings.Split(host, "\t")
+		if len(fields) < 3 {
+			continue
+		}
+		var oneHost models.Host
+		oneHost.Iface = iface
+		oneHost.IP = fields[0]
+		oneHost.Mac = fields[1]
+		oneHost.Hw = fields[2]
+		oneHost.Date = time.Now().Format("2006-01-02 15:04:05")
+		oneHost.Now = 1
+		foundHosts = append(foundHosts, oneHost)
 	}
 
 	return foundHosts
@@ -86,15 +90,14 @@ func parseOutput(text, iface string) []models.Host {
 // Scan all interfaces
 func Scan(ifaces, args string, strs []string) []models.Host {
 	var text string
-	var p []string
 	var foundHosts = []models.Host{}
 	arpArgs = args
 
 	if ifaces != "" {
 
-		p = strings.Split(ifaces, " ")
+		ifacesList := strings.Split(ifaces, " ")
 
-		for _, iface := range p {
+		for _, iface := range ifacesList {
 			slog.Debug("Scanning interface " + iface)
 			text = scanIface(iface)
 			slog.Debug("Found IPs: \n" + text)
