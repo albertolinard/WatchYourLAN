@@ -12,7 +12,7 @@ function History() {
   const showStr = localStorage.getItem("histShow") as string;
   setShow(+showStr);
   (show() === 0 || isNaN(show())) ? setShow(200) : '';
-  
+
   createEffect(() => {
     if (histUpdOnFilter()) {
       hosts = [];
@@ -38,16 +38,16 @@ function History() {
             <tr>
               <td class="opacity-50" style="width: 2em;">{index()+1}.</td>
               <td>
-                <a href={"/host/"+host.ID}>{host.Name}</a><br></br>
-                <a href={"http://"+host.IP}>{host.IP}</a>
+                <a href={"/host/"+host.id}>{host.name}</a><br></br>
+                <a href={"http://"+host.ip}>{host.ip}</a>
               </td>
               <td>
-                <MacHistory mac={host.Mac} date=""></MacHistory>
+                <MacHistory mac={host.mac} date=""></MacHistory>
               </td>
             </tr>
             }</For>
           </Show>
-          </tbody> 
+          </tbody>
         </table>
       </div>
     </div>

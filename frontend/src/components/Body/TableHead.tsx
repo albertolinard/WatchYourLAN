@@ -2,38 +2,38 @@ import { createSignal, For } from "solid-js";
 import { Host } from "../../functions/exports";
 import { sortByAnyField } from "../../functions/sort";
 
+type Column = { key: keyof Host; label: string };
+
+const columns: Column[] = [
+  { key: "name",      label: "Name" },
+  { key: "iface",     label: "Iface" },
+  { key: "ip",        label: "IP" },
+  { key: "mac",       label: "MAC" },
+  { key: "vendor",    label: "Vendor" },
+  { key: "last_seen", label: "Last seen" },
+  { key: "known",     label: "Known" },
+  { key: "online",    label: "On" },
+];
+
 function TableHead() {
+  const [sortField, setSortField] = createSignal<string>(localStorage.getItem("sortField") || "");
 
-  const [sortField, setSortField] = createSignal<string>('');
-  
-  const showSort = () => {
-    let field = localStorage.getItem("sortField") as string;
-    field === "Mac" ? field = "MAC" : '';
-    field === "Hw" ? field = "Hardware" : '';
-    field === "Now" ? field = "On" : '';
-    setSortField(field);
-  };
-  showSort();
-
-  const handleSort = (sortBy: string) => {
-    setSortField(sortBy);
-    sortBy === "MAC" ? sortBy = "Mac" : '';
-    sortBy === "Hardware" ? sortBy = "Hw" : '';
-    sortBy === "On" ? sortBy = "Now" : '';
-    sortByAnyField(sortBy as keyof Host);
+  const handleSort = (key: keyof Host) => {
+    setSortField(key);
+    sortByAnyField(key);
   };
 
   return (
     <thead>
       <tr>
         <th style="width: 2em;"></th>
-        <For each={["Name", "Iface", "IP", "MAC", "Hardware", "Date", "Known", "On"]}>{(key) =>
-          <th 
-            style={key === sortField() ? "color: var(--bs-primary);" : ''}
-          >{key} <i
+        <For each={columns}>{(c) =>
+          <th
+            style={c.key === sortField() ? "color: var(--bs-primary);" : ''}
+          >{c.label} <i
             class="bi bi-sort-down-alt my-btn"
-            onClick={[handleSort, key]}
-            title={"Sort by " + key}
+            onClick={[handleSort, c.key]}
+            title={"Sort by " + c.label}
           ></i></th>
         }</For>
         <th style="width: 2em;" title="Edit"><i class="bi bi-pencil-fill"></i></th>

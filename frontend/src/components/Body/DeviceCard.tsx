@@ -6,15 +6,15 @@ import { debounce } from "@solid-primitives/scheduled";
 
 function DeviceCard(_props: any) {
 
-  const [name, setName] = createSignal(_props.host.Name);
+  const [name, setName] = createSignal(_props.host.name);
 
-  let now = <span class="badge bg-secondary">Offline</span>;
-  if (_props.host.Now == 1) {
-    now = <span class="badge bg-success">Online</span>;
+  let onlineBadge = <span class="badge bg-secondary">Offline</span>;
+  if (_props.host.online) {
+    onlineBadge = <span class="badge bg-success">Online</span>;
   };
 
   const debouncedApi = debounce(async (val: string) => {
-    await apiEditHost(_props.host.ID, val, "");
+    await apiEditHost(_props.host.id, val, false);
   }, 300);
 
   const handleInput = async (n: string) => {
@@ -23,11 +23,11 @@ function DeviceCard(_props: any) {
   };
 
   const handleToggle = async () => {
-    await apiEditHost(_props.host.ID, name(), "toggle");
+    await apiEditHost(_props.host.id, name(), true);
   };
 
   const handleCheck = (checked: boolean) => {
-    const id = _props.host.ID;
+    const id = _props.host.id;
     setSelectedIDs(prev => {
       if (checked) {
         return prev.includes(id) ? prev : [...prev, id];
@@ -37,11 +37,12 @@ function DeviceCard(_props: any) {
     });
   };
 
-  const icon = vendorIcon(_props.host.Hw, _props.host.Mac);
+  const icon = vendorIcon(_props.host.vendor, _props.host.mac);
+  const vendor = _props.host.vendor || "";
 
   return (
     <div class="col">
-      <div class={`card h-100 ${_props.host.Now == 1 ? 'border-success' : 'border-secondary'}`}>
+      <div class={`card h-100 ${_props.host.online ? 'border-success' : 'border-secondary'}`}>
         <div class="card-body">
           <div class="d-flex align-items-start mb-2">
             <i class={`bi ${icon} fs-3 me-2 text-primary`}></i>
@@ -53,40 +54,40 @@ function DeviceCard(_props: any) {
                 <input type="text" class="form-control form-control-sm" value={name()}
                   onInput={e => handleInput(e.target.value)}></input>
               </Show>
-              <small class="text-muted">{_props.host.Iface}</small>
+              <small class="text-muted">{_props.host.iface}</small>
             </div>
-            {now}
+            {onlineBadge}
           </div>
           <div class="small">
             <div class="d-flex justify-content-between mb-1">
               <span class="text-muted">IP</span>
-              <a href={"http://" + _props.host.IP} target="_blank">{_props.host.IP}</a>
+              <a href={"http://" + _props.host.ip} target="_blank">{_props.host.ip}</a>
             </div>
             <div class="d-flex justify-content-between mb-1">
               <span class="text-muted">MAC</span>
-              <span class="font-monospace small">{_props.host.Mac}</span>
+              <span class="font-monospace small">{_props.host.mac}</span>
             </div>
-            <Show when={_props.host.Hw}>
+            <Show when={vendor}>
               <div class="d-flex justify-content-between mb-1">
-                <span class="text-muted">HW</span>
-                <span title={_props.host.Hw}>{_props.host.Hw.slice(0, 20)}</span>
+                <span class="text-muted">Vendor</span>
+                <span title={vendor}>{vendor.slice(0, 20)}</span>
               </div>
             </Show>
             <div class="d-flex justify-content-between mb-1">
               <span class="text-muted">Known</span>
               <div class="form-check form-switch form-check-sm d-inline-block">
-                <input class="form-check-input" type="checkbox" checked={_props.host.Known === 1}
+                <input class="form-check-input" type="checkbox" checked={!!_props.host.known}
                   onClick={handleToggle}></input>
               </div>
             </div>
           </div>
         </div>
         <div class="card-footer bg-transparent d-flex justify-content-between align-items-center">
-          <small class="text-muted">{_props.host.Date}</small>
+          <small class="text-muted">{_props.host.last_seen}</small>
           <Show
             when={editNames()}
             fallback={
-              <a href={"/host/" + _props.host.ID} class="btn btn-sm btn-outline-primary">
+              <a href={"/host/" + _props.host.id} class="btn btn-sm btn-outline-primary">
                 <i class="bi bi-three-dots"></i>
               </a>
             }
@@ -94,7 +95,7 @@ function DeviceCard(_props: any) {
             <input
               type="checkbox"
               class="form-check-input"
-              checked={selectedIDs().includes(_props.host.ID)}
+              checked={selectedIDs().includes(_props.host.id)}
               onChange={e => handleCheck((e.target as HTMLInputElement).checked)}
             />
           </Show>

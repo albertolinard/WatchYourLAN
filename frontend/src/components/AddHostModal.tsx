@@ -13,7 +13,7 @@ function AddHostModal(props: Props) {
   const [mac, setMac] = createSignal("");
   const [name, setName] = createSignal("");
   const [ip, setIp] = createSignal("");
-  const [hw, setHw] = createSignal("");
+  const [vendor, setVendor] = createSignal("");
   const [error, setError] = createSignal("");
   const [submitting, setSubmitting] = createSignal(false);
 
@@ -21,7 +21,7 @@ function AddHostModal(props: Props) {
     setMac("");
     setName("");
     setIp("");
-    setHw("");
+    setVendor("");
     setError("");
   };
 
@@ -42,7 +42,7 @@ function AddHostModal(props: Props) {
 
     setSubmitting(true);
     try {
-      await apiAddHost(m, name().trim(), ip().trim(), hw().trim());
+      await apiAddHost(m, name().trim(), ip().trim(), vendor().trim());
       await getHosts();
       reset();
       props.onClose();
@@ -119,12 +119,12 @@ function AddHostModal(props: Props) {
                   />
                 </div>
                 <div class="mb-3">
-                  <label class="form-label">Hardware</label>
+                  <label class="form-label">Vendor</label>
                   <input
                     class="form-control"
                     placeholder="vendor / OS / role"
-                    value={hw()}
-                    onInput={(e) => setHw(e.currentTarget.value)}
+                    value={vendor()}
+                    onInput={(e) => setVendor(e.currentTarget.value)}
                   />
                 </div>
               </div>

@@ -70,18 +70,26 @@ func escapeTag(s string) string {
 	return s
 }
 
-// Add - write data to InfluxDB2
-func Add(appConfig models.Conf, oneHist models.Host) {
+func boolToInt(b bool) int {
+	if b {
+		return 1
+	}
+	return 0
+}
+
+// Add - write data to InfluxDB2.
+// Booleans are encoded as 0/1 ints to match the historical line-protocol shape.
+func Add(appConfig models.Conf, h models.Host) {
 	w := getWriter(appConfig)
 
-	name := escapeTag(oneHist.Name)
+	name := escapeTag(h.Name)
 	if name == "" {
 		name = "unknown"
 	}
 
 	line := fmt.Sprintf("WatchYourLAN,IP=%s,iface=%s,name=%s,mac=%s,known=%d state=%d",
-		escapeTag(oneHist.IP), escapeTag(oneHist.Iface), name, escapeTag(oneHist.Mac),
-		oneHist.Known, oneHist.Now)
+		escapeTag(h.IP), escapeTag(h.Iface), name, escapeTag(h.Mac),
+		boolToInt(h.Known), boolToInt(h.Online))
 
 	err := w.WriteRecord(context.Background(), line)
 	if check.IfError(err) {

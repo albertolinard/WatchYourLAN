@@ -141,6 +141,27 @@
     display: inline-flex;
 }
 
+.scan-status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.28rem 0.65rem;
+    border-radius: 999px;
+    background-color: rgba(255,255,255,0.16);
+    color: #fff;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+}
+
+.scan-status-dot {
+    width: 0.55rem;
+    height: 0.55rem;
+    border-radius: 50%;
+    background-color: #9ef0b8;
+    animation: pulse-online 1.6s ease-out infinite;
+}
+
 /* ===== Dark mode refinements ===== */
 [data-bs-theme="dark"] .card {
     border-color: rgba(255,255,255,0.08);

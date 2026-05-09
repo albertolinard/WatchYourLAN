@@ -1,5 +1,3 @@
-FROM --platform=$BUILDPLATFORM tonistiigi/xx AS xx
-
 # Frontend build
 FROM --platform=$BUILDPLATFORM node:alpine AS frontend
 
@@ -9,10 +7,8 @@ RUN npm ci
 COPY frontend/ .
 RUN npm run build
 
-# Go backend build
+# Go backend build (cross-compile via buildx-injected GOOS/GOARCH; CGO disabled)
 FROM --platform=$BUILDPLATFORM golang:alpine AS builder
-
-COPY --from=xx / /
 
 WORKDIR /src
 
@@ -26,8 +22,11 @@ COPY backend/ .
 RUN rm -rf internal/web/public/assets/*
 COPY --from=frontend /src/dist/assets/. internal/web/public/assets/
 
-ARG TARGETPLATFORM
-RUN CGO_ENABLED=0 xx-go build -ldflags='-w -s' -o /WatchYourLAN ./cmd/WatchYourLAN
+ARG TARGETOS
+ARG TARGETARCH
+ARG TARGETVARIANT
+RUN CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH GOARM=${TARGETVARIANT#v} \
+    go build -ldflags='-w -s' -o /WatchYourLAN ./cmd/WatchYourLAN
 
 
 FROM alpine

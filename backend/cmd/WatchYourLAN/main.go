@@ -43,7 +43,9 @@ func main() {
 	// Make AppConfig
 	conf.Start(*dirPtr, *nodePtr)
 
-	gdb.Start()
+	if err := gdb.Start(); err != nil {
+		panic(err)
+	}
 
 	routines.ScanRestart()
 	routines.HistoryTrim()

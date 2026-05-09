@@ -39,7 +39,6 @@ func Gui() {
 	slog.Info(colorCyan + "\n=================================== " +
 		"\n  WatchYourLAN Version: " + conf.AppConfig.Version +
 		"\n  Config dir: " + conf.AppConfig.DirPath +
-		"\n  Default DB: " + conf.AppConfig.UseDB +
 		"\n  Log level: " + conf.AppConfig.LogLevel +
 		"\n  Web GUI: http://" + address +
 		"\n=================================== " + colorReset)

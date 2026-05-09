@@ -5,10 +5,10 @@ import { debounce } from "@solid-primitives/scheduled";
 
 function HostCard(_props: any) {
 
-  let name:string = "";
+  let name: string = "";
 
   const debouncedApi = debounce(async (val: string) => {
-      await apiEditHost(_props.host.ID, val, "");
+      await apiEditHost(_props.host.id, val, false);
     }, 300);
 
   const handleInput = async (n: string) => {
@@ -18,24 +18,24 @@ function HostCard(_props: any) {
 
   const handleToggle = async () => {
     if (name == "") {
-      name = _props.host.Name;
+      name = _props.host.name;
     }
-    await apiEditHost(_props.host.ID, name, 'toggle');
+    await apiEditHost(_props.host.id, name, true);
   };
 
   const handleDel = async () => {
-    await apiDelHost(_props.host.ID);
+    await apiDelHost(_props.host.id);
     window.location.href = '/';
   };
 
   const handleWOL = async () => {
-    await apiWOL(_props.host.Mac);
+    await apiWOL(_props.host.mac);
   };
 
-  const icon = vendorIcon(_props.host.Hw, _props.host.Mac);
-  const vendor = vendorName(_props.host.Mac);
-  const isOnline = _props.host.Now == 1;
-  const isKnown = _props.host.Known == 1;
+  const icon = vendorIcon(_props.host.vendor, _props.host.mac);
+  const vendorOui = vendorName(_props.host.mac);
+  const isOnline = !!_props.host.online;
+  const isKnown = !!_props.host.known;
 
   return (
     <div class="card border-primary h-100">
@@ -43,8 +43,8 @@ function HostCard(_props: any) {
         <div class="d-flex align-items-center gap-2">
           <i class={`bi ${icon} fs-3 text-primary`}></i>
           <div>
-            <h5 class="mb-0">{_props.host.Name || "Unknown"}</h5>
-            <small class="text-muted">{vendor ? vendor : _props.host.Hw}</small>
+            <h5 class="mb-0">{_props.host.name || "Unknown"}</h5>
+            <small class="text-muted">{vendorOui ? vendorOui : _props.host.vendor}</small>
           </div>
         </div>
         <div class="d-flex align-items-center gap-2">
@@ -62,11 +62,11 @@ function HostCard(_props: any) {
                 <h6 class="text-muted small mb-2"><i class="bi bi-globe me-1"></i>Network</h6>
                 <dl class="row mb-0">
                   <dt class="col-sm-4 text-muted small">IP</dt>
-                  <dd class="col-sm-8"><a href={"http://" + _props.host.IP} target="_blank">{_props.host.IP}</a></dd>
+                  <dd class="col-sm-8"><a href={"http://" + _props.host.ip} target="_blank">{_props.host.ip}</a></dd>
                   <dt class="col-sm-4 text-muted small">DNS</dt>
-                  <dd class="col-sm-8">{_props.host.DNS || "—"}</dd>
+                  <dd class="col-sm-8">{_props.host.dns || "—"}</dd>
                   <dt class="col-sm-4 text-muted small">Iface</dt>
-                  <dd class="col-sm-8">{_props.host.Iface}</dd>
+                  <dd class="col-sm-8">{_props.host.iface}</dd>
                 </dl>
               </div>
             </div>
@@ -77,11 +77,13 @@ function HostCard(_props: any) {
                 <h6 class="text-muted small mb-2"><i class="bi bi-hdd-network me-1"></i>Hardware</h6>
                 <dl class="row mb-0">
                   <dt class="col-sm-4 text-muted small">MAC</dt>
-                  <dd class="col-sm-8"><code>{_props.host.Mac}</code></dd>
-                  <dt class="col-sm-4 text-muted small">Type</dt>
-                  <dd class="col-sm-8">{_props.host.Hw || "—"}</dd>
+                  <dd class="col-sm-8"><code>{_props.host.mac}</code></dd>
+                  <dt class="col-sm-4 text-muted small">Vendor</dt>
+                  <dd class="col-sm-8">{_props.host.vendor || "—"}</dd>
                   <dt class="col-sm-4 text-muted small">Last seen</dt>
-                  <dd class="col-sm-8 small">{_props.host.Date}</dd>
+                  <dd class="col-sm-8 small">{_props.host.last_seen}</dd>
+                  <dt class="col-sm-4 text-muted small">First seen</dt>
+                  <dd class="col-sm-8 small">{_props.host.first_seen}</dd>
                 </dl>
               </div>
             </div>
@@ -94,7 +96,7 @@ function HostCard(_props: any) {
               <div class="d-flex align-items-center gap-2">
                 <span class="text-muted small fw-semibold">Name:</span>
                 <input type="text" class="form-control form-control-sm" style="max-width: 14em;"
-                  value={_props.host.Name}
+                  value={_props.host.name}
                   onInput={e => handleInput(e.target.value)}></input>
               </div>
               <div class="d-flex align-items-center gap-2">

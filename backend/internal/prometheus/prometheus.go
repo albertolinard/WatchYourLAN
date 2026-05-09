@@ -2,7 +2,6 @@ package prometheus
 
 import (
 	"net/http"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus"
@@ -31,17 +30,31 @@ var up = promauto.NewGaugeVec(prometheus.GaugeOpts{
 	Help:      "Whether the host is up (1 for yes, 0 for no)",
 }, []string{"ip", "iface", "name", "mac", "known"})
 
+func boolToStr(b bool) string {
+	if b {
+		return "1"
+	}
+	return "0"
+}
+
+func boolToFloat(b bool) float64 {
+	if b {
+		return 1
+	}
+	return 0
+}
+
 // Add a Prometheus metric
-func Add(oneHist models.Host) {
-	if oneHist.Name == "" {
-		oneHist.Name = "unknown"
+func Add(h models.Host) {
+	if h.Name == "" {
+		h.Name = "unknown"
 	}
 
 	up.With(prometheus.Labels{
-		"ip":    oneHist.IP,
-		"iface": oneHist.Iface,
-		"name":  oneHist.Name,
-		"mac":   oneHist.Mac,
-		"known": strconv.Itoa(oneHist.Known),
-	}).Set(float64(oneHist.Now))
+		"ip":    h.IP,
+		"iface": h.Iface,
+		"name":  h.Name,
+		"mac":   h.Mac,
+		"known": boolToStr(h.Known),
+	}).Set(boolToFloat(h.Online))
 }

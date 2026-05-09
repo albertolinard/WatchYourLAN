@@ -14,7 +14,6 @@ import (
 
 // getVersion godoc
 // @Summary      Get application version
-// @Description  Returns the current running version of the application
 // @Tags         system
 // @Produce      json
 // @Success      200  {string}  string
@@ -25,7 +24,6 @@ func getVersion(c *gin.Context) {
 
 // triggerRescan godoc
 // @Summary      Rescan all interfaces now
-// @Description  Manually trigger rescan
 // @Tags         system
 // @Produce      json
 // @Success      200  {string}  string  "OK"
@@ -35,9 +33,18 @@ func triggerRescan(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
+// getScanState godoc
+// @Summary      Get scan state
+// @Tags         system
+// @Produce      json
+// @Success      200  {object}  routines.ScanState
+// @Router       /scan_state [get]
+func getScanState(c *gin.Context) {
+	c.IndentedJSON(http.StatusOK, routines.GetScanState())
+}
+
 // getConfig godoc
 // @Summary      Get application configuration
-// @Description  Returns the current configuration used by the app
 // @Tags         system
 // @Produce      json
 // @Success      200  {object}  models.Conf
@@ -48,7 +55,6 @@ func getConfig(c *gin.Context) {
 
 // notifyTest godoc
 // @Summary      Send test notification
-// @Description  Trigger a test notification to verify notification settings
 // @Tags         system
 // @Produce      json
 // @Success      200  {string}  string  "OK"
@@ -60,45 +66,40 @@ func notifyTest(c *gin.Context) {
 
 // getStatus godoc
 // @Summary      Get network status
-// @Description  Retrieve summary statistics of hosts, optionally filtered by interface
 // @Tags         system
 // @Produce      json
-// @Param        iface  path      string  false  "Interface name (omit for all interfaces)"
+// @Param        iface  path      string  false  "Interface name (omit for all)"
 // @Success      200    {object}  models.Stat
 // @Router       /status/{iface} [get]
 func getStatus(c *gin.Context) {
-	var status models.Stat
-	var searchHosts []models.Host
-
-	allHosts, _ := gdb.Select("now")
+	allHosts := gdb.ListHosts()
 
 	iface := c.Param("iface")
-	iface = iface[1:]
+	if len(iface) > 0 && iface[0] == '/' {
+		iface = iface[1:]
+	}
 
+	var search []models.Host
 	if iface != "" && iface != "undefined" {
-		for _, host := range allHosts {
-			if iface == host.Iface {
-				searchHosts = append(searchHosts, host)
-			}
-		}
+		search = gdb.ListHostsByIface(iface)
 	} else {
-		searchHosts = allHosts
+		search = allHosts
 	}
 
-	for _, host := range searchHosts {
-		status.Total = status.Total + 1
-
-		if host.Known > 0 {
-			status.Known = status.Known + 1
+	var stat models.Stat
+	for _, h := range search {
+		stat.Total++
+		if h.Known {
+			stat.Known++
 		} else {
-			status.Unknown = status.Unknown + 1
+			stat.Unknown++
 		}
-		if host.Now > 0 {
-			status.Online = status.Online + 1
+		if h.Online {
+			stat.Online++
 		} else {
-			status.Offline = status.Offline + 1
+			stat.Offline++
 		}
 	}
 
-	c.IndentedJSON(http.StatusOK, status)
+	c.IndentedJSON(http.StatusOK, stat)
 }

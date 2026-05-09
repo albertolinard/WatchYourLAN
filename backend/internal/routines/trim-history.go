@@ -8,21 +8,19 @@ import (
 	"github.com/aceberg/WatchYourLAN/internal/gdb"
 )
 
-// HistoryTrim - routine for History
+// HistoryTrim - drop host_events older than TrimHist hours.
 func HistoryTrim() {
-
 	go func() {
 		for {
-			time.Sleep(time.Duration(1) * time.Hour) // Every hour
+			time.Sleep(1 * time.Hour)
 
 			hours := conf.AppConfig.TrimHist
-			nowMinus := time.Now().Add(-time.Duration(hours) * time.Hour)
-			date := nowMinus.Format("2006-01-02 15:04:05")
+			cutoff := time.Now().Add(-time.Duration(hours) * time.Hour)
 
-			slog.Info("Removing all History before", "date", date)
+			slog.Info("Trimming host events older than", "cutoff", cutoff)
 
-			n := gdb.DeleteOldHistory(date)
-			slog.Info("Removed records from History", "n", n)
+			n := gdb.TrimEventsBefore(cutoff)
+			slog.Info("Removed host events", "n", n)
 		}
 	}()
 }

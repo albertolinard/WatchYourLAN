@@ -26,12 +26,12 @@ function HostPage() {
         <HostCard host={currentHost()}></HostCard>
       </div>
       <div class="col-lg-4">
-        <Ping IP={currentHost().IP}></Ping>
+        <Ping IP={currentHost().ip}></Ping>
       </div>
     </div>
     <div class="row mt-3">
       <div class="col-12">
-        <HistCard mac={currentHost().Mac}></HistCard>
+        <HistCard mac={currentHost().mac}></HistCard>
       </div>
     </div>
     </>

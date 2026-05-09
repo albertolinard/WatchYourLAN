@@ -12,7 +12,7 @@ function TopologyMap() {
   const groups = (): IfaceGroup[] => {
     const map = new Map<string, typeof allHosts[0][]>();
     for (const h of allHosts) {
-      const key = h.Iface || "unknown";
+      const key = h.iface || "unknown";
       if (!map.has(key)) map.set(key, []);
       map.get(key)!.push(h);
     }
@@ -20,7 +20,7 @@ function TopologyMap() {
   };
 
   const onlineCount = (hosts: typeof allHosts[0][]) =>
-    hosts.filter(h => h.Now === 1).length;
+    hosts.filter(h => h.online).length;
 
   return (
     <div class="card border-primary mb-4">
@@ -39,13 +39,13 @@ function TopologyMap() {
             </div>
             <div class="topology-nodes">
               <For each={group.hosts}>{(host) =>
-                <a href={`/host/${host.ID}`} class="topology-node" classList={{
-                  "topology-node-online": host.Now === 1,
-                  "topology-node-offline": host.Now === 0,
-                  "topology-node-known": host.Known === 1,
+                <a href={`/host/${host.id}`} class="topology-node" classList={{
+                  "topology-node-online":  host.online,
+                  "topology-node-offline": !host.online,
+                  "topology-node-known":   host.known,
                 }}>
-                  <i class={`bi ${vendorIcon(host.Hw, host.Mac)}`}></i>
-                  <span class="topology-node-name">{host.Name || host.IP}</span>
+                  <i class={`bi ${vendorIcon(host.vendor, host.mac)}`}></i>
+                  <span class="topology-node-name">{host.name || host.ip}</span>
                 </a>
               }</For>
             </div>

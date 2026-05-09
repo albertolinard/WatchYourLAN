@@ -14,7 +14,7 @@ import (
 // Unknown - send message to log and shoutrrr
 func Unknown(host models.Host) {
 
-	msg := fmt.Sprintf("Unknown host found. Name: '%s', IP: '%s', MAC: '%s', Hw: '%s', Iface: '%s'", host.DNS, host.IP, host.Mac, host.Hw, host.Iface)
+	msg := fmt.Sprintf("Unknown host found. Name: '%s', IP: '%s', MAC: '%s', Vendor: '%s', Iface: '%s'", host.DNS, host.IP, host.Mac, host.Vendor, host.Iface)
 
 	slog.Warn(msg)
 	shout(msg)

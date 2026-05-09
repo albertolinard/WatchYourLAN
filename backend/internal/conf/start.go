@@ -18,7 +18,6 @@ func Start(dirPath, nodePath string) {
 
 	AppConfig.DirPath = dirPath
 	AppConfig.ConfPath = confPath
-	AppConfig.DBPath = dirPath + "/scan.db"
 	if nodePath != "" {
 		AppConfig.NodePath = nodePath
 	}

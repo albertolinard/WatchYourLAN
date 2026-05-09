@@ -49,21 +49,6 @@ function Scan() {
               <td><input name="trim" type="number" class="form-control" value={appConfig().TrimHist}></input></td>
             </tr>
             <tr>
-              <td>Use DB</td>
-              <td><select name="usedb" class="form-select">
-                <Show
-                  when={appConfig().UseDB == "sqlite"}
-                  fallback={<>
-                    <option value="sqlite">sqlite</option>
-                    <option value="postgres" selected>postgres</option>
-                  </>}
-                >
-                  <option value="sqlite" selected>sqlite</option>
-                  <option value="postgres">postgres</option>
-                </Show>
-              </select></td>
-            </tr>
-            <tr>
               <td>PG Connect URL</td>
               <td>
                 <textarea name="pgconnect" class="form-control" style="width: 100%;" rows="3" wrap="soft">{appConfig().PGConnect}</textarea>

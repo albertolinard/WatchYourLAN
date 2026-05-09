@@ -16,6 +16,11 @@ Lightweight network IP scanner with web GUI. Features:
 - Keep a list of all hosts in the network
 - Send data to `InfluxDB2` or `Prometheus` to make a `Grafana` dashboard 
 
+> [!WARNING]
+> This repository has diverged from the original `aceberg/WatchYourLAN` project.
+> The data model, API behavior, database/runtime assumptions, and UI behavior have been changed here and are not compatible with the original repository.
+> Do not assume images, configs, or database contents from this fork can be used interchangeably with upstream.
+
 > [!IMPORTANT]   
 > Please, consider making a [donation](https://github.com/aceberg#donate). Even $10 will make a difference to me.
 

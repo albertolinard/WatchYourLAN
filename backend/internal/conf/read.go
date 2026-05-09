@@ -24,7 +24,6 @@ func read(path string) (config models.Conf) {
 	viper.SetDefault("TRIM_HIST", 48)
 	viper.SetDefault("SHOUTRRR_URL", "")
 
-	viper.SetDefault("USE_DB", "sqlite")
 	viper.SetDefault("PG_CONNECT", "")
 
 	viper.SetDefault("INFLUX_ENABLE", false)
@@ -36,7 +35,7 @@ func read(path string) (config models.Conf) {
 	err := viper.ReadInConfig()
 	check.IfError(err)
 
-	viper.AutomaticEnv() // Get ENVIRONMENT variables
+	viper.AutomaticEnv() // ENVIRONMENT variables
 
 	config.Host = viper.Get("HOST").(string)
 	config.Port = viper.Get("PORT").(string)
@@ -51,7 +50,6 @@ func read(path string) (config models.Conf) {
 	config.TrimHist = viper.GetInt("TRIM_HIST")
 	config.ShoutURL = viper.Get("SHOUTRRR_URL").(string)
 
-	config.UseDB = viper.Get("USE_DB").(string)
 	config.PGConnect = viper.Get("PG_CONNECT").(string)
 
 	config.InfluxEnable = viper.GetBool("INFLUX_ENABLE")
@@ -64,7 +62,6 @@ func read(path string) (config models.Conf) {
 	config.PrometheusEnable = viper.GetBool("PROMETHEUS_ENABLE")
 
 	joined := viper.Get("ARP_STRS_JOINED").(string)
-	// slog.Info("ARP_STRS_JOINED: " + joined)
 
 	if joined != "" {
 		config.ArpStrs = strings.Split(joined, ",")

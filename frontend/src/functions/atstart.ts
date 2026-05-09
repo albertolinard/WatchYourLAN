@@ -1,17 +1,22 @@
-import { apiGetAllHosts, apiGetStatus } from "./api";
-import { allHosts, setAllHosts, setBkpHosts, setIfaces, setAppStat } from "./exports";
+import { apiGetAllHosts, apiGetScanState, apiGetStatus } from "./api";
+import { allHosts, setAllHosts, setBkpHosts, setIfaces, setAppStat, setScanState } from "./exports";
 import { filterAtStart, filterFunc } from "./filter";
 import { sortAtStart } from "./sort";
 
 export function runAtStart() {
   getHosts();
   getStats();
-  filterFunc("ID", 0); // reset filter
+  getScanState();
+  filterFunc("", 0); // reset filter
 
   setInterval(() => {
     getHosts();
     getStats();
-  }, 60000); // 60000 ms = 1 minute
+  }, 60000); // 1 minute
+
+  setInterval(() => {
+    getScanState();
+  }, 5000); // scan status should feel live
 }
 
 export async function getHosts() {
@@ -34,13 +39,20 @@ export async function getStats() {
   }
 }
 
+export async function getScanState() {
+  const state = await apiGetScanState();
+  if (state !== null) {
+    setScanState(state);
+  }
+}
+
 function listIfaces() {
 
-  let ifaces:string[] = [];
+  let ifaces: string[] = [];
 
   for (let host of allHosts) {
-    if (!ifaces.includes(host.Iface)) {
-      ifaces.push(host.Iface);
+    if (host.iface && !ifaces.includes(host.iface)) {
+      ifaces.push(host.iface);
     }
   }
 

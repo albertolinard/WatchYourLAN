@@ -29,36 +29,40 @@ export const apiTestNotify = async () => {
   await fetch(url);
 };
 
-export const apiEditHost = async (id:number, name:string, known:string) => {
+export const apiEditHost = async (id:string, name:string, toggleKnown:boolean) => {
 
-  const url = apiPath+'/api/edit/'+id+'/'+name+'/'+known;
-  const res = await (await fetch(url, { method: 'PUT' })).json();
+  const url = apiPath+'/api/host/'+encodeURIComponent(id);
+  const res = await (await fetch(url, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name, toggle_known: toggleKnown }),
+  })).json();
 
   return res;
 };
 
 export const apiGetHost = async (id:string) => {
 
-  const url = apiPath+'/api/host/'+id;
+  const url = apiPath+'/api/host/'+encodeURIComponent(id);
   const res = await (await fetch(url)).json();
 
   return res;
 };
 
-export const apiDelHost = async (id:number) => {
+export const apiDelHost = async (id:string) => {
 
-  const url = apiPath+'/api/host/del/'+id;
+  const url = apiPath+'/api/host/'+encodeURIComponent(id);
   const res = await (await fetch(url, { method: 'DELETE' })).json();
 
   return res;
 };
 
-export const apiAddHost = async (mac:string, name:string, ip:string, hw:string) => {
+export const apiAddHost = async (mac:string, name:string, ip:string, vendor:string) => {
 
   const params = new URLSearchParams();
-  if (name) params.set('name', name);
-  if (ip)   params.set('ip', ip);
-  if (hw)   params.set('hw', hw);
+  if (name)   params.set('name', name);
+  if (ip)     params.set('ip', ip);
+  if (vendor) params.set('vendor', vendor);
   const qs = params.toString();
 
   const url = apiPath + '/api/host/add/' + encodeURIComponent(mac) + (qs ? '?' + qs : '');
@@ -77,18 +81,18 @@ export const apiPortScan = async (ip:string, port:number) => {
   return res;
 };
 
-export const apiGetHistory = async (mac:string) => {
-  const url = apiPath+'/api/history/'+mac+'/?num=210';
-  const hosts = await (await fetch(url)).json();
+export const apiGetEvents = async (mac:string) => {
+  const url = apiPath+'/api/events/'+encodeURIComponent(mac)+'?num=210';
+  const events = await (await fetch(url)).json();
 
-  return hosts;
+  return events;
 };
 
-export const apiGetHistoryByDate = async (mac:string, date: string) => {
-  const url = apiPath+'/api/history/'+mac+'/'+date;
-  const hosts = await (await fetch(url)).json();
+export const apiGetEventsByDate = async (mac:string, date: string) => {
+  const url = apiPath+'/api/events/'+encodeURIComponent(mac)+'/'+encodeURIComponent(date);
+  const events = await (await fetch(url)).json();
 
-  return hosts;
+  return events;
 };
 
 export const apiWOL = async (mac:string) => {
@@ -101,6 +105,13 @@ export const apiWOL = async (mac:string) => {
 
 export const apiGetStatus = async () => {
   const url = apiPath+'/api/status/';
+  const res = await (await fetch(url)).json();
+
+  return res;
+};
+
+export const apiGetScanState = async () => {
+  const url = apiPath+'/api/scan_state';
   const res = await (await fetch(url)).json();
 
   return res;

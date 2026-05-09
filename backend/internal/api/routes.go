@@ -7,32 +7,26 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
-// Routes - start API routes
+// Routes - register API routes.
 func Routes(router *gin.Engine) {
-
 	r0 := router.Group("/api")
 	{
-		r0.GET("/all", getAllHosts)                // api-hosts.go
-		r0.PUT("/edit/:id/:name/*known", editHost) // api-hosts.go
-		r0.GET("/host/:id", getHost)               // api-hosts.go
-		r0.DELETE("/host/del/:id", delHost)        // api-hosts.go
-		r0.POST("/host/add/:mac", addHost)         // api-hosts.go
-
-		// Backwards-compat aliases for old GET callers (curl scripts, bookmarks).
-		// Remove once all consumers migrate.
-		r0.GET("/edit/:id/:name/*known", editHost)
-		r0.GET("/host/del/:id", delHost)
-		r0.GET("/host/add/:mac", addHost)
+		r0.GET("/all", getAllHosts)        // api-hosts.go
+		r0.GET("/host/:id", getHost)       // api-hosts.go
+		r0.PUT("/host/:id", editHost)      // api-hosts.go
+		r0.DELETE("/host/:id", delHost)    // api-hosts.go
+		r0.POST("/host/add/:mac", addHost) // api-hosts.go
 
 		r0.GET("/config", getConfig)        // api-system.go
 		r0.GET("/notify_test", notifyTest)  // api-system.go
 		r0.GET("/status/*iface", getStatus) // api-system.go
 		r0.GET("/version", getVersion)      // api-system.go
 		r0.GET("/rescan", triggerRescan)    // api-system.go
+		r0.GET("/scan_state", getScanState) // api-system.go
 
-		r0.GET("/history", getHistory)                  // api-history.go
-		r0.GET("/history/:mac", getHistoryByMAC)        // api-history.go
-		r0.GET("/history/:mac/:date", getHistoryByDate) // api-history.go
+		r0.GET("/events", getEvents)                  // api-history.go
+		r0.GET("/events/:mac", getEventsByMAC)        // api-history.go
+		r0.GET("/events/:mac/:date", getEventsByDate) // api-history.go
 
 		r0.GET("/port/:addr/:port", getPortState) // api-network.go
 		r0.GET("/wol/:mac", sendWOL)              // api-network.go

@@ -12,7 +12,6 @@ import (
 )
 
 func saveConfigHandler(c *gin.Context) {
-
 	conf.AppConfig.Host = c.PostForm("host")
 	conf.AppConfig.Port = c.PostForm("port")
 	conf.AppConfig.Theme = c.PostForm("theme")
@@ -21,68 +20,54 @@ func saveConfigHandler(c *gin.Context) {
 	conf.AppConfig.ShoutURL = c.PostForm("shout")
 
 	conf.Write(conf.AppConfig)
-
 	c.Redirect(http.StatusFound, c.Request.Referer())
 }
 
 func saveSettingsHandler(c *gin.Context) {
-
 	conf.AppConfig.LogLevel = c.PostForm("log")
 	conf.AppConfig.ArpArgs = c.PostForm("arpargs")
 	conf.AppConfig.Ifaces = c.PostForm("ifaces")
 
-	useDB := c.PostForm("usedb")
 	pgConnect := c.PostForm("pgconnect")
-
-	if useDB != conf.AppConfig.UseDB || pgConnect != conf.AppConfig.PGConnect {
-		conf.AppConfig.UseDB = c.PostForm("usedb")
-		conf.AppConfig.PGConnect = c.PostForm("pgconnect")
-		gdb.Connect()
+	if pgConnect != "" && pgConnect != conf.AppConfig.PGConnect {
+		old := conf.AppConfig.PGConnect
+		conf.AppConfig.PGConnect = pgConnect
+		if err := gdb.Connect(); err != nil {
+			conf.AppConfig.PGConnect = old
+			c.AbortWithStatus(http.StatusBadGateway)
+			return
+		}
 	}
 
-	timeout := c.PostForm("timeout")
-	trimHist := c.PostForm("trim")
-	conf.AppConfig.Timeout, _ = strconv.Atoi(timeout)
-	conf.AppConfig.TrimHist, _ = strconv.Atoi(trimHist)
+	conf.AppConfig.Timeout, _ = strconv.Atoi(c.PostForm("timeout"))
+	conf.AppConfig.TrimHist, _ = strconv.Atoi(c.PostForm("trim"))
 
-	arpStrs := c.PostFormArray("arpstrs")
 	conf.AppConfig.ArpStrs = []string{}
-	for _, s := range arpStrs {
+	for _, s := range c.PostFormArray("arpstrs") {
 		if s != "" {
 			conf.AppConfig.ArpStrs = append(conf.AppConfig.ArpStrs, s)
 		}
 	}
 
 	conf.Write(conf.AppConfig)
-
 	routines.ScanRestart()
-
 	c.Redirect(http.StatusFound, c.Request.Referer())
 }
 
 func saveInfluxHandler(c *gin.Context) {
-
 	conf.AppConfig.InfluxAddr = c.PostForm("addr")
 	conf.AppConfig.InfluxToken = c.PostForm("token")
 	conf.AppConfig.InfluxOrg = c.PostForm("org")
 	conf.AppConfig.InfluxBucket = c.PostForm("bucket")
-
-	enable := c.PostForm("enable")
-	skip := c.PostForm("skip")
-	conf.AppConfig.InfluxEnable = enable == "on"
-	conf.AppConfig.InfluxSkipTLS = skip == "on"
+	conf.AppConfig.InfluxEnable = c.PostForm("enable") == "on"
+	conf.AppConfig.InfluxSkipTLS = c.PostForm("skip") == "on"
 
 	conf.Write(conf.AppConfig)
-
 	c.Redirect(http.StatusFound, c.Request.Referer())
 }
 
 func savePrometheusHandler(c *gin.Context) {
-	enable := c.PostForm("enable")
-
-	conf.AppConfig.PrometheusEnable = enable == "on"
-
+	conf.AppConfig.PrometheusEnable = c.PostForm("enable") == "on"
 	conf.Write(conf.AppConfig)
-
 	c.Redirect(http.StatusFound, c.Request.Referer())
 }

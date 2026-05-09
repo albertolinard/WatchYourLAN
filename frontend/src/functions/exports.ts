@@ -2,16 +2,34 @@ import { createSignal } from "solid-js";
 import { createStore } from "solid-js/store";
 
 export interface Host {
-	ID:    number;
-	Name:  string;
-	DNS:   string;
-	Iface: string;
-	IP:    string;
-	Mac:   string;
-	Hw:    string;
-	Date:  string;
-	Known: number;
-	Now:   number;
+	id:         string;
+	mac:        string;
+	name:       string;
+	dns:        string;
+	iface:      string;
+	ip:         string;
+	vendor:     string;
+	known:      boolean;
+	online:     boolean;
+	first_seen: string;
+	last_seen:  string;
+};
+
+export type EventKind =
+	| "online"
+	| "offline"
+	| "ip_change"
+	| "renamed"
+	| "known_toggled";
+
+export interface HostEvent {
+	id:        string;
+	host_id:   string;
+	mac:       string;
+	ts:        string;
+	kind:      EventKind;
+	old_value?: string;
+	new_value?: string;
 };
 
 export interface Conf {
@@ -28,7 +46,6 @@ export interface Conf {
 	ArpStrs:   string[];
 	TrimHist:  number;
 	ShoutURL:  string;
-	UseDB:     string;
 	PGConnect: string;
 	// InfluxDB
 	InfluxEnable:  boolean;
@@ -41,17 +58,18 @@ export interface Conf {
 	PrometheusEnable: boolean;
 };
 
-export const emptyHost:Host = {
-	ID:    0,
-	Name:  "",
-	DNS:   "",
-	Iface: "",
-	IP:    "",
-	Mac:   "",
-	Hw:    "",
-	Date:  "",
-	Known: 0,
-	Now:   0,
+export const emptyHost: Host = {
+	id:         "",
+	mac:        "",
+	name:       "",
+	dns:        "",
+	iface:      "",
+	ip:         "",
+	vendor:     "",
+	known:      false,
+	online:     false,
+	first_seen: "",
+	last_seen:  "",
 };
 
 export const emptyConf:Conf = {
@@ -68,7 +86,6 @@ export const emptyConf:Conf = {
 	ArpStrs: [],
 	TrimHist: 48,
 	ShoutURL: "",
-	UseDB: "",
 	PGConnect: "",
 	InfluxEnable:  false,
 	InfluxAddr:    "",
@@ -92,25 +109,31 @@ export const [show, setShow] = createSignal<number>(200);
 
 export const [histUpdOnFilter, setHistUpdOnFilter] = createSignal(false);
 
-export const [selectedIDs, setSelectedIDs] = createSignal<number[]>([]);
+export const [selectedIDs, setSelectedIDs] = createSignal<string[]>([]);
 
 export interface Stat {
-  Total:   number;
-  Online:  number;
-  Offline: number;
-  Known:   number;
-  Unknown: number;
+  total:   number;
+  online:  number;
+  offline: number;
+  known:   number;
+  unknown: number;
+};
+
+export interface ScanState {
+  running: boolean;
 };
 
 export const emptyStat:Stat = {
-  Total:   0,
-  Online:  0,
-  Offline: 0,
-  Known:   0,
-  Unknown: 0,
+  total:   0,
+  online:  0,
+  offline: 0,
+  known:   0,
+  unknown: 0,
 };
 
 export const [appStat, setAppStat] = createSignal<Stat>(emptyStat);
+
+export const [scanState, setScanState] = createSignal<ScanState>({ running: false });
 
 export const [viewMode, setViewMode] = createSignal<string>("table");
 

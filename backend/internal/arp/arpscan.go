@@ -79,9 +79,9 @@ func parseOutput(text, iface string) []models.Host {
 		oneHost.Iface = iface
 		oneHost.IP = fields[0]
 		oneHost.Mac = fields[1]
-		oneHost.Hw = fields[2]
-		oneHost.Date = time.Now().Format("2006-01-02 15:04:05")
-		oneHost.Now = 1
+		oneHost.Vendor = fields[2]
+		oneHost.LastSeen = time.Now()
+		oneHost.Online = true
 		foundHosts = append(foundHosts, oneHost)
 	}
 

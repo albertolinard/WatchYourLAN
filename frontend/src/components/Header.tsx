@@ -1,5 +1,5 @@
 import { createSignal, Show } from "solid-js";
-import { appConfig, setAppConfig, allHosts } from "../functions/exports";
+import { appConfig, setAppConfig, allHosts, scanState } from "../functions/exports";
 import { apiGetConfig } from "../functions/api";
 
 function Header() {
@@ -28,7 +28,7 @@ function Header() {
   }
   setCurrentTheme();
 
-  const unknownCount = () => allHosts.filter(h => h.Known === 0).length;
+  const unknownCount = () => allHosts.filter(h => !h.known).length;
 
   return (
     <>
@@ -55,6 +55,14 @@ function Header() {
           </li>
           <li class="nav-item">
             <a class="nav-link active" href="/history/" title="History">History</a>
+          </li>
+          <li class="nav-item d-flex align-items-center ms-md-3">
+            <Show when={scanState().running}>
+              <span class="scan-status-pill" title="Network scan is currently running">
+                <span class="scan-status-dot"></span>
+                Scanning
+              </span>
+            </Show>
           </li>
         </ul>
         <ul class="navbar-nav">

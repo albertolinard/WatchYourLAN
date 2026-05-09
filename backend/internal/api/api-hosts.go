@@ -3,6 +3,7 @@ package api
 import (
 	"log/slog"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 
@@ -19,102 +20,148 @@ import (
 // @Success      200  {array}   models.Host
 // @Router       /all [get]
 func getAllHosts(c *gin.Context) {
-	allHosts, _ := gdb.Select("now")
-	c.IndentedJSON(http.StatusOK, allHosts)
+	c.IndentedJSON(http.StatusOK, gdb.ListHosts())
 }
 
 // getHost godoc
 // @Summary      Get host by ID
-// @Description  Retrieve detailed information about a host by its unique ID
+// @Description  Retrieve detailed information about a host by its UUID
 // @Tags         hosts
 // @Produce      json
-// @Param        id   path      string  true  "Host ID"
+// @Param        id   path      string  true  "Host UUID"
 // @Success      200  {object}  models.Host
 // @Router       /host/{id} [get]
 func getHost(c *gin.Context) {
-	idStr := c.Param("id")
-	host := getHostByID(idStr) // functions.go
+	id := c.Param("id")
+	host, ok := gdb.GetHost(id)
+	if !ok {
+		c.AbortWithStatus(http.StatusNotFound)
+		return
+	}
 	_, host.DNS = check.DNS(host)
 	c.IndentedJSON(http.StatusOK, host)
 }
 
 // delHost godoc
 // @Summary      Delete host
-// @Description  Remove a host from the database by its unique ID
+// @Description  Remove a host from the database by its UUID
 // @Tags         hosts
 // @Produce      json
-// @Param        id   path      string  true  "Host ID"
+// @Param        id   path      string  true  "Host UUID"
 // @Success      200  {string}  string  "OK"
-// @Router       /host/del/{id} [get]
+// @Router       /host/del/{id} [delete]
 func delHost(c *gin.Context) {
-	idStr := c.Param("id")
-	host := getHostByID(idStr) // functions.go
-	gdb.Delete("now", host.ID)
+	id := c.Param("id")
+	host, ok := gdb.GetHost(id)
+	if !ok {
+		c.AbortWithStatus(http.StatusNotFound)
+		return
+	}
+	if err := gdb.DeleteHost(host.ID); err != nil {
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
 	slog.Info("Deleting from DB", "host", host)
 	c.IndentedJSON(http.StatusOK, "OK")
 }
 
 // addHost godoc
 // @Summary      Add host manually
-// @Description  Add host by MAC, with optional Name, IP, Hardware
-// @Description  Returns `models.Host` with this MAC form DB, either just added or existing
+// @Description  Add host by MAC, with optional name, ip, vendor.
+// @Description  Returns the host with this MAC, either just added or pre-existing.
 // @Tags         hosts
 // @Produce      json
-// @Param        mac   path      string  true   "Host MAC"
-// @Param        name  query     string  false  "Name"
-// @Param        ip    query     string  false  "IP"
-// @Param        hw    query     string  false  "Hardware"
-// @Success      200  {object}  models.Host
-// @Router       /host/add/{mac} [get]
+// @Param        mac     path      string  true   "Host MAC"
+// @Param        name    query     string  false  "Name"
+// @Param        ip      query     string  false  "IP"
+// @Param        vendor  query     string  false  "Vendor"
+// @Success      200     {object}  models.Host
+// @Router       /host/add/{mac} [post]
 func addHost(c *gin.Context) {
-
 	mac := c.Param("mac")
-	hosts := gdb.SelectByMAC("now", mac)
 
-	if len(hosts) > 0 {
-		slog.Warn("Host with this MAC already exists", "host", hosts[0])
-	} else {
-		var host models.Host
-
-		host.Mac = mac
-		host.Name = c.Query("name")
-		host.IP = c.Query("ip")
-		host.Hw = c.Query("hw")
-
-		gdb.Update("now", host)
-		hosts = gdb.SelectByMAC("now", mac)
-
-		slog.Info("Added host to DB", "host", hosts[0])
+	if existing, ok := gdb.GetHostByMAC(mac); ok {
+		slog.Warn("Host with this MAC already exists", "host", existing)
+		c.IndentedJSON(http.StatusOK, existing)
+		return
 	}
 
-	c.IndentedJSON(http.StatusOK, hosts[0])
+	now := time.Now()
+	h := models.Host{
+		Mac:       mac,
+		Name:      c.Query("name"),
+		IP:        c.Query("ip"),
+		Vendor:    c.Query("vendor"),
+		Online:    false,
+		Known:     false,
+		FirstSeen: now,
+		LastSeen:  now,
+	}
+	if err := gdb.UpsertHost(&h); err != nil {
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+	slog.Info("Added host to DB", "host", h)
+	c.IndentedJSON(http.StatusOK, h)
+}
+
+// editHostBody — payload for PUT /host/:id.
+// `toggle_known: true` flips the known flag; otherwise it is left as-is.
+type editHostBody struct {
+	Name         *string `json:"name"`
+	ToggleKnown  bool    `json:"toggle_known"`
 }
 
 // editHost godoc
 // @Summary      Edit host
-// @Description  Update a host's name and optionally toggle its "known" status
+// @Description  Update a host's name and optionally toggle its `known` flag.
 // @Tags         hosts
+// @Accept       json
 // @Produce      json
-// @Param        id     path      string  true  "Host ID"
-// @Param        name   path      string  true  "New name for the host"
-// @Param        known  path      string  false "Pass 'toggle' to flip the known/unknown status"
-// @Success      200    {string}  string  "OK"
-// @Router       /edit/{id}/{name}/{known} [get]
+// @Param        id    path      string         true  "Host UUID"
+// @Param        body  body      editHostBody   true  "Edit payload"
+// @Success      200    {object}  models.Host
+// @Router       /host/{id} [put]
 func editHost(c *gin.Context) {
-
-	idStr := c.Param("id")
-	name := c.Param("name")
-	toggleKnown := c.Param("known")
-
-	host := getHostByID(idStr) // functions.go
-
-	host.Name = name
-
-	if toggleKnown == "/toggle" {
-		host.Known = 1 - host.Known
+	id := c.Param("id")
+	host, ok := gdb.GetHost(id)
+	if !ok {
+		c.AbortWithStatus(http.StatusNotFound)
+		return
 	}
 
-	gdb.Update("now", host)
+	var body editHostBody
+	if err := c.ShouldBindJSON(&body); err != nil {
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
 
-	c.IndentedJSON(http.StatusOK, "OK")
+	now := time.Now()
+
+	if body.Name != nil && *body.Name != host.Name {
+		old := host.Name
+		host.Name = *body.Name
+		_ = gdb.AddEvent(&models.HostEvent{
+			HostID: host.ID, Mac: host.Mac, Ts: now,
+			Kind: models.EventRenamed, OldValue: old, NewValue: host.Name,
+		})
+	}
+
+	if body.ToggleKnown {
+		host.Known = !host.Known
+		newVal := "false"
+		if host.Known {
+			newVal = "true"
+		}
+		_ = gdb.AddEvent(&models.HostEvent{
+			HostID: host.ID, Mac: host.Mac, Ts: now,
+			Kind: models.EventKnownToggled, NewValue: newVal,
+		})
+	}
+
+	if err := gdb.SaveHost(&host); err != nil {
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+	c.IndentedJSON(http.StatusOK, host)
 }

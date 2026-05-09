@@ -9,7 +9,7 @@ import (
 	"github.com/aceberg/WatchYourLAN/internal/models"
 )
 
-// Write - write config to file
+// Write - persist config to file.
 func Write(config models.Conf) {
 
 	slog.Info("Writing new config to " + config.ConfPath)
@@ -25,13 +25,12 @@ func Write(config models.Conf) {
 	viper.Set("LOG_LEVEL", config.LogLevel)
 	viper.Set("ARP_ARGS", config.ArpArgs)
 	viper.Set("ARP_STRS", config.ArpStrs)
-	viper.Set("ARP_STRS_JOINED", "") // Can be set only with ENV
+	viper.Set("ARP_STRS_JOINED", "") // Set only via ENV
 	viper.Set("IFACES", config.Ifaces)
 	viper.Set("TIMEOUT", config.Timeout)
 	viper.Set("TRIM_HIST", config.TrimHist)
 	viper.Set("SHOUTRRR_URL", config.ShoutURL)
 
-	viper.Set("USE_DB", config.UseDB)
 	viper.Set("PG_CONNECT", config.PGConnect)
 
 	viper.Set("influx_enable", config.InfluxEnable)

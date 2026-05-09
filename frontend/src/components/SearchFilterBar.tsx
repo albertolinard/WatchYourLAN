@@ -19,8 +19,7 @@ function SearchFilterBar() {
       next.splice(idx, 1);
       return next;
     });
-    // Reset all filters and re-apply remaining
-    filterFunc("ID", 0);
+    filterFunc("", 0);
     for (const f of activeFilters().filter((_, i) => i !== idx)) {
       filterFunc(f.field as keyof Host, undefined);
     }
@@ -29,7 +28,7 @@ function SearchFilterBar() {
   const clearAll = () => {
     setActiveFilters([]);
     setSearchText("");
-    filterFunc("ID", 0);
+    filterFunc("", 0);
     searchFunc("");
   };
 
@@ -58,16 +57,16 @@ function SearchFilterBar() {
           <ul class="dropdown-menu">
             <li class="dropdown-header">Interface</li>
             <For each={ifaces()}>{(iface) =>
-              <li><a class="dropdown-item" href="#" onClick={(e) => { e.preventDefault(); addFilter("Iface", iface, "Iface: " + iface); }}>{iface}</a></li>
+              <li><a class="dropdown-item" href="#" onClick={(e) => { e.preventDefault(); addFilter("iface", iface, "Iface: " + iface); }}>{iface}</a></li>
             }</For>
             <li><hr class="dropdown-divider" /></li>
             <li class="dropdown-header">Status</li>
-            <li><a class="dropdown-item" href="#" onClick={(e) => { e.preventDefault(); addFilter("Now", 1, "Online"); }}>Online</a></li>
-            <li><a class="dropdown-item" href="#" onClick={(e) => { e.preventDefault(); addFilter("Now", 0, "Offline"); }}>Offline</a></li>
+            <li><a class="dropdown-item" href="#" onClick={(e) => { e.preventDefault(); addFilter("online", true, "Online"); }}>Online</a></li>
+            <li><a class="dropdown-item" href="#" onClick={(e) => { e.preventDefault(); addFilter("online", false, "Offline"); }}>Offline</a></li>
             <li><hr class="dropdown-divider" /></li>
             <li class="dropdown-header">Known</li>
-            <li><a class="dropdown-item" href="#" onClick={(e) => { e.preventDefault(); addFilter("Known", 1, "Known"); }}>Known</a></li>
-            <li><a class="dropdown-item" href="#" onClick={(e) => { e.preventDefault(); addFilter("Known", 0, "Unknown"); }}>Unknown</a></li>
+            <li><a class="dropdown-item" href="#" onClick={(e) => { e.preventDefault(); addFilter("known", true, "Known"); }}>Known</a></li>
+            <li><a class="dropdown-item" href="#" onClick={(e) => { e.preventDefault(); addFilter("known", false, "Unknown"); }}>Unknown</a></li>
           </ul>
         </div>
 

@@ -2,11 +2,11 @@ import { For } from "solid-js";
 import { appStat } from "../functions/exports";
 
 const cardDefs = [
-  { key: "Total",   icon: "bi-diagram-3",     color: "primary",   label: "Total" },
-  { key: "Online",  icon: "bi-check-circle",  color: "success",   label: "Online" },
-  { key: "Offline", icon: "bi-x-circle",      color: "secondary", label: "Offline" },
-  { key: "Known",   icon: "bi-shield-check",  color: "info",      label: "Known" },
-  { key: "Unknown", icon: "bi-shield-exclamation", color: "warning", label: "Unknown" },
+  { key: "total",   icon: "bi-diagram-3",     color: "primary",   label: "Total" },
+  { key: "online",  icon: "bi-check-circle",  color: "success",   label: "Online" },
+  { key: "offline", icon: "bi-x-circle",      color: "secondary", label: "Offline" },
+  { key: "known",   icon: "bi-shield-check",  color: "info",      label: "Known" },
+  { key: "unknown", icon: "bi-shield-exclamation", color: "warning", label: "Unknown" },
 ] as const;
 
 function StatsCards() {
