@@ -2,6 +2,7 @@ import { createSignal, Show } from "solid-js";
 import { editNames, selectedIDs, setSelectedIDs } from "../../functions/exports";
 import { apiEditHost } from "../../functions/api";
 import { vendorIcon } from "../../functions/vendor";
+import { formatTimestamp } from "../../functions/format";
 
 import { debounce } from "@solid-primitives/scheduled";
 
@@ -57,7 +58,7 @@ function TableRow(_props: any) {
       <td><a href={"http://" + _props.host.ip} target="_blank">{_props.host.ip}</a></td>
       <td>{_props.host.mac}</td>
       <td title={vendor}>{vendor.length > 12 ? vendor.slice(0, 12) + ".." : vendor}</td>
-      <td>{_props.host.last_seen}</td>
+      <td>{formatTimestamp(_props.host.last_seen)}</td>
       <td>
         <div class="form-check form-switch">
           <input class="form-check-input" type="checkbox" checked={!!_props.host.known}

@@ -2,6 +2,7 @@ import { createSignal, Show } from "solid-js";
 import { editNames, selectedIDs, setSelectedIDs } from "../../functions/exports";
 import { apiEditHost } from "../../functions/api";
 import { vendorIcon } from "../../functions/vendor";
+import { formatTimestamp } from "../../functions/format";
 import { debounce } from "@solid-primitives/scheduled";
 
 function DeviceCard(_props: any) {
@@ -83,7 +84,7 @@ function DeviceCard(_props: any) {
           </div>
         </div>
         <div class="card-footer bg-transparent d-flex justify-content-between align-items-center">
-          <small class="text-muted">{_props.host.last_seen}</small>
+          <small class="text-muted">{formatTimestamp(_props.host.last_seen)}</small>
           <Show
             when={editNames()}
             fallback={

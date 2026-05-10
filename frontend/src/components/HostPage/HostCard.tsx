@@ -1,6 +1,7 @@
 import { Show } from "solid-js";
 import { apiDelHost, apiEditHost, apiWOL } from "../../functions/api";
 import { vendorIcon, vendorName } from "../../functions/vendor";
+import { formatTimestamp } from "../../functions/format";
 import { debounce } from "@solid-primitives/scheduled";
 
 function HostCard(_props: any) {
@@ -81,9 +82,9 @@ function HostCard(_props: any) {
                   <dt class="col-sm-4 text-muted small">Vendor</dt>
                   <dd class="col-sm-8">{_props.host.vendor || "—"}</dd>
                   <dt class="col-sm-4 text-muted small">Last seen</dt>
-                  <dd class="col-sm-8 small">{_props.host.last_seen}</dd>
+                  <dd class="col-sm-8 small">{formatTimestamp(_props.host.last_seen)}</dd>
                   <dt class="col-sm-4 text-muted small">First seen</dt>
-                  <dd class="col-sm-8 small">{_props.host.first_seen}</dd>
+                  <dd class="col-sm-8 small">{formatTimestamp(_props.host.first_seen)}</dd>
                 </dl>
               </div>
             </div>
