@@ -44,19 +44,19 @@ function DeviceCard(_props: any) {
     <div class="col">
       <div class={`card h-100 ${_props.host.online ? 'border-success' : 'border-secondary'}`}>
         <div class="card-body">
-          <div class="d-flex align-items-start mb-2">
-            <i class={`bi ${icon} fs-3 me-2 text-primary`}></i>
-            <div class="flex-grow-1">
+          <div class="d-flex align-items-start mb-2 gap-2">
+            <i class={`bi ${icon} fs-3 text-primary flex-shrink-0`}></i>
+            <div class="flex-grow-1 overflow-hidden">
               <Show
                 when={editNames()}
-                fallback={<h6 class="card-title mb-0">{name() || "Unknown"}</h6>}
+                fallback={<h6 class="card-title mb-0 text-truncate">{name() || "Unknown"}</h6>}
               >
                 <input type="text" class="form-control form-control-sm" value={name()}
                   onInput={e => handleInput(e.target.value)}></input>
               </Show>
               <small class="text-muted">{_props.host.iface}</small>
             </div>
-            {onlineBadge}
+            <span class="flex-shrink-0">{onlineBadge}</span>
           </div>
           <div class="small">
             <div class="d-flex justify-content-between mb-1">

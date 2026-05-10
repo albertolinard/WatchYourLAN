@@ -2,14 +2,6 @@ import { allHosts, bkpHosts, Host, setAllHosts } from "./exports";
 
 let oldFilter: keyof Host | "" = "";
 
-export function filterAtStart() {
-  const field = (localStorage.getItem("filterField") || "") as keyof Host;
-  const raw = localStorage.getItem("filterValue");
-  const value: any = raw === "true" ? true : raw === "false" ? false : raw;
-
-  filterFunc(field, value);
-}
-
 export function filterFunc(field: keyof Host | "", value: any) {
 
   let addrsArray = allHosts;
@@ -18,9 +10,6 @@ export function filterFunc(field: keyof Host | "", value: any) {
     addrsArray = bkpHosts();
   }
   oldFilter = field;
-
-  if (field) localStorage.setItem("filterField", field);
-  localStorage.setItem("filterValue", String(value));
 
   switch (field) {
     case 'iface':

@@ -1,13 +1,15 @@
 import { apiGetAllHosts, apiGetScanState, apiGetStatus } from "./api";
 import { allHosts, setAllHosts, setBkpHosts, setIfaces, setAppStat, setScanState } from "./exports";
-import { filterAtStart, filterFunc } from "./filter";
 import { sortAtStart } from "./sort";
 
 export function runAtStart() {
+  // Clear stale localStorage filter — activeFilters signal is the source of truth
+  localStorage.removeItem("filterField");
+  localStorage.removeItem("filterValue");
+
   getHosts();
   getStats();
   getScanState();
-  filterFunc("", 0); // reset filter
 
   setInterval(() => {
     getHosts();
@@ -28,7 +30,6 @@ export async function getHosts() {
 
     listIfaces();
     sortAtStart();
-    filterAtStart();
   }
 }
 
